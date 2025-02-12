@@ -65,6 +65,7 @@
     <Compile Include="Assets\Scripts\RasPiMouse\Wheel.cs" />
     <Compile Include="Assets\Scripts\LineTrace\Handlers\CrossHandler.cs" />
     <Compile Include="Assets\Scripts\SearchMission\Astar.cs" />
+    <Compile Include="Assets\Scripts\SearchMission\Raspi.cs" />
     <Compile Include="Assets\Scripts\SearchMission\MultiagentSearchResult.cs" />
     <Compile Include="Assets\Scripts\Display\CrossDisp.cs" />
     <Compile Include="Assets\Scripts\LineTrace\Pilot.cs" />
@@ -116,6 +117,7 @@
     <Compile Include="Assets\Scripts\RasPiMouse\Mouse.cs" />
     <Compile Include="Assets\Scripts\LineTrace\Pilot_CSoS_ver1.cs" />
     <Compile Include="Assets\Scripts\RasPiMouse\Device\MiniCamera.cs" />
+    <Compile Include="Assets\Scripts\LineTrace\dir.cs" />
     <Compile Include="Assets\Scripts\SearchMission\Isearch.cs" />
     <Compile Include="Assets\Scripts\SearchMission\MultiagentSearchInterface.cs" />
   </ItemGroup>
@@ -123,12 +125,16 @@
     <None Include="Assets\Scripts\SearchMission\Examples\empty_single.xml" />
     <None Include="Assets\Prefabs\RasPiMouse\Parts\raspimouse_description\CMakeLists.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
+    <None Include="Assets\Scripts\SearchMission\Examples\empty_single2.xml" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
     <None Include="Assets\Scripts\SearchMission\Examples\empty-16-16-random-1.xml" />
     <None Include="Assets\Scripts\SearchMission\Examples\empty_batch_full_log.xml" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
+    <None Include="Assets\Scripts\SearchMission\Examples\empty-16-16-random-4.xml" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Mobile.cginc" />
+    <None Include="Assets\Scripts\SearchMission\Examples\unity_case.xml" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF SSD.shader" />
+    <None Include="Assets\Scripts\SearchMission\Examples\unity_case_bigversion.xml" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\Scripts\SearchMission\empty_single2_log.xml" />
     <None Include="Assets\Scripts\NATS.Client.1.0.2\lib\netstandard2.0\NATS.Client.dll" />
@@ -151,6 +157,8 @@
     <None Include="Assets\Scripts\SearchMission\Examples\empty.xml" />
     <None Include="Assets\streamingAssets\sum.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
+    <None Include="Assets\Scripts\SearchMission\Examples\unity-16-16-random-2.xml" />
+    <None Include="Assets\Scripts\SearchMission\Examples\empty-16-16-random-3.xml" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />

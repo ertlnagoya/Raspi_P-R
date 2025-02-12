@@ -4,18 +4,68 @@ using NATS.Client;
 using UnityEngine;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Collections.Generic;
+using Mission;
 
 namespace LineTrace
 {
+    [System.Serializable]
+    public class IntArrayWrapper
+    {
+        public int[] values;
+    }
     public class Nats
     {
         private readonly IConnection connection;
+        private readonly string subject = "path";  // 监听的频道
 
         public Nats()
         {
             var opts = ConnectionFactory.GetDefaultOptions();
             opts.Url = "nats://localhost:4222";
             connection = new ConnectionFactory().CreateConnection(opts);
+        }
+
+        /// <summary>
+        /// 订阅 NATS 消息，并解析为 int[]
+        /// </summary>
+        /// <param name="onMessageReceived">回调函数，接收 int[] 目标点序号</param>
+        /// <summary>
+        /// 订阅 NATS 消息，并解析为 int[]（使用 JsonUtility）
+        /// </summary>
+        /// <param name="onMessageReceived">回调函数，接收 int[] 目标点序号</param>
+        public void Subscribe(Action<int[]> onMessageReceived, int robotId)
+        {
+            IAsyncSubscription sub = connection.SubscribeAsync(subject);
+
+            sub.MessageHandler += (sender, args) =>
+            {
+                try
+                {
+                    string message = Encoding.UTF8.GetString(args.Message.Data);
+                    Debug.Log($"Received NATS message: {message}");
+
+                    // 解析 JSON 数组
+                    RobotPathsWrapper receivedPaths = JsonUtility.FromJson<RobotPathsWrapper>(message);
+                    RobotPath robotPath = receivedPaths.paths.Find(path => path.id == robotId);
+
+                    if (robotPath != null && robotPath.path.Length > 0)  // 确保有目标点
+                    {
+                        onMessageReceived?.Invoke(robotPath.path);
+                    }
+                    else
+                    {
+                        Debug.LogError("Received empty or invalid command array.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"Error processing NATS message: {ex.Message}");
+                }
+            };
+
+            sub.Start();
+            Debug.Log("NATS Listener started.");
         }
 
         public string SendRaw(string sub, Demand demand)
@@ -128,5 +178,32 @@ namespace LineTrace
         return await SendRaw_Resource_Async(sub, demand);
         }
 
+        [Serializable]
+        private class RobotPathsWrapper
+        {
+            public List<RobotPath> paths = new List<RobotPath>();
+
+            public RobotPathsWrapper(Dictionary<int, int[]> robotPaths)
+            {
+                foreach (var kvp in robotPaths)
+                {
+                    paths.Add(new RobotPath(kvp.Key, kvp.Value));
+                }
+            }
+        }
+
+        [Serializable]
+        private class RobotPath
+        {
+            public int id;
+            public int[] path;
+
+            public RobotPath(int id, int[] path)
+            {
+                this.id = id;
+                this.path = path;
+            }
+        }
     }
+}
 }

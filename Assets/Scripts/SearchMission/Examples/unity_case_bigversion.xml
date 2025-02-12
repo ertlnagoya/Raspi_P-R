@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<root>
+    <map>
+        <grid width="27" height="27">
+            <row>0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+            <row>0 1 0 1 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 0</row>
+            <row>0 1 0 0 0 1 1 1 0 0 1 1 1 1 1 1 1 1 0 0 0 0 1 0 0 0 0</row>
+            <row>0 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 0 1 1 1 1 0 1 1 1</row>
+            <row>0 1 1 1 1 1 1 1 0 0 1 1 1 1 1 1 1 1 0 1 1 1 1 0 0 0 0</row>
+            <row>0 1 1 1 1 1 1 1 0 1 1 0 0 0 0 1 1 1 0 1 1 1 1 1 1 1 0</row>
+            <row>0 1 0 0 0 0 0 0 0 0 0 0 1 1 0 1 1 0 0 1 1 1 1 1 0 0 0</row>
+            <row>0 1 0 1 1 1 1 1 1 1 1 1 1 1 0 1 1 0 1 1 1 1 1 1 0 1 1</row>
+            <row>0 0 0 1 1 1 1 1 1 1 1 1 1 1 0 1 1 0 1 1 0 0 0 0 0 0 0</row>
+            <row>0 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 0 0 0 0 1 1 1 1 1 0</row>
+            <row>0 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 1 1 1 1 1 1 1 0</row>
+            <row>0 1 1 1 1 1 1 1 1 1 1 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 0</row>
+            <row>0 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 0 0 0 1 1 1 1 1 0</row>
+            <row>0 1 1 1 0 0 0 0 0 1 1 1 0 1 0 0 0 1 1 1 0 1 1 1 1 1 0</row>
+            <row>0 1 1 1 0 1 1 1 0 1 1 1 0 0 0 1 0 1 1 1 0 1 1 1 1 1 0</row>
+            <row>0 1 1 1 0 1 1 1 0 1 1 1 1 1 1 1 0 1 1 1 0 1 1 1 1 1 0</row>
+            <row>0 1 0 0 0 1 1 1 0 1 1 1 1 1 0 0 0 1 1 1 0 1 1 1 0 0 0</row>
+            <row>0 1 0 1 1 1 1 1 0 1 1 1 1 1 0 1 1 1 1 1 0 1 1 1 0 1 1</row>
+            <row>0 1 0 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1 0 1 1 1 0 1 1</row>
+            <row>0 1 0 1 1 1 1 1 1 1 1 1 1 1 0 1 0 1 1 1 0 1 1 1 0 1 1</row>
+            <row>0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 1 0 1 1 1 0 1 1 1 0 1 1</row>
+            <row>1 0 1 1 1 1 1 1 1 0 1 1 1 1 1 1 0 1 1 1 0 1 1 1 0 1 1</row>
+            <row>1 0 1 1 1 1 1 1 1 0 1 1 1 1 1 1 0 1 1 1 0 0 0 0 0 1 1</row>
+            <row>1 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 1 1 1 1 1 0 1 1 1 1</row>
+            <row>1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 0 1 1 1 1 1 0 1 1 1 1</row>
+            <row>1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 0 1 1 1 1 1 0 1 1 1 1</row>
+            <row>1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1</row>
+        </grid>
+        <cross id="5" grid_i="0" grid_j="8"/>
+        <cross id="4" grid_i="0" grid_j="21"/>
+        <cross id="9" grid_i="6" grid_j="8"/>
+        <cross id="6" grid_i="8" grid_j="0"/>
+        <cross id="3" grid_i="8" grid_j="24"/>
+        <cross id="10" grid_i="9" grid_j="18"/>
+        <cross id="8" grid_i="18" grid_j="14"/>
+        <cross id="7" grid_i="20" grid_j="1"/>
+        <cross id="2" grid_i="22" grid_j="22"/>
+        <cross id="0" grid_i="23" grid_j="9"/>
+        <cross id="1" grid_i="26" grid_j="16"/>
+    </map>
+    <algorithm>
+        <planner>pr</planner>
+        <low_level>astar</low_level>
+        <with_cat>false</with_cat>
+        <with_perfect_h>false</with_perfect_h>
+        <with_card_conf>false</with_card_conf>
+        <with_bypassing>false</with_bypassing>
+        <with_matching_h>false</with_matching_h>
+        <with_disjoint_splitting>false</with_disjoint_splitting>
+        <gen_subopt_from_opt>false</gen_subopt_from_opt>
+        <focal_w>1.5</focal_w>
+        <pp_order>2</pp_order>
+        <parallelize_paths_1>true</parallelize_paths_1>
+        <parallelize_paths_2>true</parallelize_paths_2>
+    </algorithm>
+    <options>
+        <agents_file>unity-16-16-random</agents_file>
+        <tasks_count>1</tasks_count>
+        <agents_range min="1" max="5"/>
+        <maxtime>1000</maxtime>
+        <single_execution>true</single_execution>
+        <aggregated_results>false</aggregated_results>
+    <logfilename />
+  </options>
+</root>

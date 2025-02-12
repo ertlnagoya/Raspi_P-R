@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<root>
+    <agent id="0" start_i="8" start_j="1" goal_i="8" goal_j="11"/>
+    <agent id="1" start_i="2" start_j="5" goal_i="13" goal_j="3"/>
+    <agent id="2" start_i="4" start_j="14" goal_i="10" goal_j="2"/>
+    <agent id="3" start_i="13" start_j="11" goal_i="4" goal_j="7"/>
+    <agent id="4" start_i="11" start_j="9" goal_i="0" goal_j="10"/>
+    <agent id="5" start_i="12" start_j="2" goal_i="0" goal_j="12"/>
+    <agent id="6" start_i="7" start_j="11" goal_i="14" goal_j="8"/>
+</root>

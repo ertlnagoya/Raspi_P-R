@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace LineTrace
@@ -18,6 +18,12 @@ namespace LineTrace
                 if (nexts[i] == -1) continue;
                 _pivs[i] = transform.Find($"dir{nexts[i]}").position;
             }
+        }
+
+        void OnDrawGizmos()
+        {
+            Gizmos.color = Color.yellow; 
+            Gizmos.DrawSphere(transform.position, 0.02f); 
         }
 
         public Vector3 GetDir(int next)

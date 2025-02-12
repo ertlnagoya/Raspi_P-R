@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Mission
 {
@@ -59,7 +60,7 @@ namespace Mission
             return config.GetConfig(mapFile);
         }
 
-        
+
         // 创建日志
         public bool CreateLog()
         {
@@ -166,7 +167,7 @@ namespace Mission
 
                 Stopwatch chronoTimer = Stopwatch.StartNew();
                 var clockStart = DateTime.Now;
-                
+
                 sr = multiagentSearch.startSearch(map, config, curAgentSet);
 
                 chronoTimer.Stop();
@@ -334,10 +335,50 @@ namespace Mission
 
         public bool creatTask()
         {
-            agentSet.Clear();           
+            agentSet.Clear();
             return agentSet.CreatAgents(map, config);
         }
 
+        public bool creatUnityTask(Dictionary<int, Robot> robots, List<int> priorityList)
+        {
+            
+            if (robots == null || priorityList == null)
+            {
+                UnityEngine.Debug.LogError("Error: Robots dictionary or priority list is null.");
+                return false;
+            }
+
+            if (robots.Count == 0)
+            {
+                UnityEngine.Debug.LogError("Error: Robots dictionary is empty.");
+                return false;
+            }
+
+            if (priorityList.Count == 0)
+            {
+                UnityEngine.Debug.LogError("Error: Priority list is empty.");
+                return false;
+            }
+            
+            foreach (int robotId in robots.Keys)
+            {
+                if (!priorityList.Contains(robotId))
+                {
+                    UnityEngine.Debug.LogError($"Error: Robot ID {robotId} is not in the priority list.");
+                    return false;
+                }
+            }
+
+            UnityEngine.Debug.Log("CreateUnityTask: All checks passed.");
+            return true;
+
+        }
+        public Dictionary<int, int[]> getResults()
+        {
+            Dictionary<int, int[]> paths = new Dictionary<int, int[]>();
+
+            return paths;
+        }
     }
 }
 

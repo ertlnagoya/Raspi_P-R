@@ -1,5 +1,7 @@
-using LineTrace.Handlers;
+﻿using LineTrace.Handlers;
 using RasPiMouse;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -22,24 +24,58 @@ namespace LineTrace
         private Cross preCross = null;
         private float radius = 0f;
         private bool reted = true;
+        private bool isMoving = false;
 
         private float reTime;
 
         private string[] RMColor = { "Red", "Blue", "Green", "Yellow", "Purple", "Orange", "Pink", "Brown", "Gray", "White" };
-        
+        private List<int> targetPointIndices = new List<int>();  // 存储目标点序号
+        private int currentTargetIndex = 0;  // 当前目标点索引
+
+
         private void Awake()
         {
             mouse = GetComponent<Mouse>();
             handler = new Handler(mouse, RMColor[id]);
             nats = new Nats();
+            nats.Subscribe(ChangeTargetPoints, id);
 
-            goal = RandomGoal();
-            nats.Send("init", new Demand {Id = id, Src = src, Dst = dst});
+            goal = RandomGoal(-1);
+            nats.Send("goal", new Demand {Id = id, Src = src, Dst = dst, Goal = goal});
+        }
+
+        private void ChangeTargetPoints(int[] newTargetIndices)
+        {
+            targetPointIndices.Clear();
+            targetPointIndices.AddRange(newTargetIndices);
+            currentTargetIndex = 0;
+            isMoving = true;
+
+            Debug.Log($"New path received: {string.Join(", ", targetPointIndices)}");
+
+            if (targetPointIndices.Count == 0)
+            {
+                Debug.LogWarning("No target points available.");
+                nats.Send("goal", new Demand { Id = id, Src = src, Dst = dst, Goal = goal });
+                return;
+            }
+            if (dst != targetPointIndices[0])  // 起点
+            {
+                Debug.Log("Last point is NOT the end point.");
+                return;
+            }
+            if (goal != targetPointIndices[targetPointIndices.Count - 1])  // endPointIndex 是终点索引
+            {
+                Debug.Log("Last point is NOT the end point.");
+                return;
+            }
+
+
         }
 
         private void Update()
         {
-            if (re != 0)
+            if (re != 0)  // re means retry
             {
                 mouse.Stop();
 
@@ -48,19 +84,13 @@ namespace LineTrace
                 {
                     re--;
                     reTime = 0f;
-                    var next = nats.Send("next", new Demand {Id = id, Src = src, Dst = dst, Goal = goal, Re = re == 0});
-
-                    if (next >= 0)
-                    {
-                        SetNext(next);
-                        re = 0;
-                    }
+                    nats.Send("goal", new Demand {Id = id, Src = src, Dst = dst, Goal = goal, Re = re == 0});
                 }
             }
             else
             {
                 handler.Handle();
-                if (!reted && preCross && (preCross.transform.position - transform.position).magnitude > 0.375f)
+                if (!reted && preCross && (preCross.transform.position - transform.position).magnitude > 0.05f)
                 {
                     reted = true;
                     nats.Send("ret", new Demand {Id = id, Src = src, Dst = dst});
@@ -91,21 +121,23 @@ namespace LineTrace
             if (cross.number == goal)
             {
                 level++;
-                goal = RandomGoal();
+                goal = RandomGoal(goal);
+                nats.Send("goal", new Demand { Id = id, Src = src, Dst = dst, Goal = goal, Re = false });
                 print("[Goal]" + " RM: " + RMColor[id] + " Goal count: " + level + " time[s]: " + Time.time);
             }
 
-            var next = nats.Send("next", new Demand {Id = id, Src = src, Dst = dst, Goal = goal, Re = false});
-
-            if (next >= 0)
+            if (currentTargetIndex + 1 < targetPointIndices.Count && dst == targetPointIndices[currentTargetIndex]) // How if next is not connect to des?
             {
+                currentTargetIndex++;
+                var next = targetPointIndices[currentTargetIndex];
                 SetNext(next);
-                re = 0;
             }
             else
             {
-                re = -next;
-            }
+                Debug.Log("Error in the plan ---> repaln from cuerrent position");
+                handler.SetBack();
+                nats.Send("goal", new Demand { Id = id, Src = dst, Dst = src, Goal = goal, Re = true });
+            }    
         }
 
         private void SetNext(int next)
@@ -113,7 +145,7 @@ namespace LineTrace
             if (src == next)
             {
                 handler.SetBack();
-                nats.Send("ret", new Demand {Id = id, Src = src, Dst = dst});
+                nats.Send("ret", new Demand {Id = id, Src = dst, Dst = src});
             }
             else
             {
@@ -138,11 +170,17 @@ namespace LineTrace
 //            reted = true;
 //        }
 
-        private int RandomGoal()
-        {
-            var rv = Random.Range(0, 10);
-            if (rv >= dst) rv++;
-            return rv;
+        int RandomGoal(int preGoal)
+        {            
+            int[] points = { 259, 281, 251, 151, 12, 22, 104, 204, 211, 74, 130 };
+            int newPoint;
+
+            do
+            {
+                newPoint = points[Random.Range(0, points.Length)];
+            }
+            while (newPoint == preGoal);  // 确保新点不同于上次的点           
+            return newPoint;
         }
     }
 }

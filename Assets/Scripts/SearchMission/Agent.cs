@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RosMessageTypes.Actionlib;
+using System;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -100,6 +101,12 @@ namespace Mission
         {
             cur_i = i;
             cur_j = j;
+        }
+
+        public void setGoalPosition(Node goal)
+        {
+            goal_i = goal.i;
+            goal_j = goal.j;
         }
 
         public void setSubgraph(int Subgraph)

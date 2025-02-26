@@ -16,16 +16,16 @@ namespace Display
 
         private void Awake()
         {
-            myMat = GetComponent<MeshRenderer>().material;
-            nats = new Nats();
+            //myMat = GetComponent<MeshRenderer>().material;
+            //nats = new Nats();
 
-            num = int.Parse(name);
+            //num = int.Parse(name);
         }
 
         private void Update()
         {
-            var n = nats.Send("disp", new Demand {Src = num, Dst = -1});
-            myMat.color = n == 1 ? color : Color.white;
+            //var n = nats.Send("disp", new Demand {Src = num, Dst = -1});
+            //myMat.color = n == 1 ? color : Color.white;
         }
 
         private void OnDestroy()

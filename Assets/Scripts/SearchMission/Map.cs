@@ -9,6 +9,8 @@ using System.Runtime.ConstrainedExecution;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
+using System.IO.Compression;
 
 namespace Mission
 {
@@ -36,33 +38,35 @@ namespace Mission
 
             bool hasGrid = false, hasHeight = false, hasWidth = false;
 
-
+            
             // 加载XML文件
             XDocument doc;
-            doc = XDocument.Load(fileName);
+            
+            //doc = XDocument.Load(fileName);
+            
             try
             {
                 doc = XDocument.Load(fileName);
             }
             catch (Exception)
             {
-                Console.WriteLine("Error opening XML file!");
+                Debug.LogError("Error opening XML file!");
                 return false;
             }
-
+            
             // 获取根元素
             XElement root = doc.Element(Constants.CNS_TAG_ROOT);
             if (root == null)
             {
-                Console.WriteLine("Error! No 'CNS_TAG_ROOT' tag found in XML file!");
+                Debug.LogError("Error! No 'CNS_TAG_ROOT' tag found in XML file!");
                 return false;
             }
-
+            
             // 获取地图元素
             XElement map = root.Element(Constants.CNS_TAG_MAP);
             if (map == null)
             {
-                Console.WriteLine("Error! No 'CNS_TAG_MAP' tag found in XML file!");
+                Debug.LogError("Error! No 'CNS_TAG_MAP' tag found in XML file!");
                 return false;
             }
 
@@ -82,7 +86,7 @@ namespace Mission
                     }
                     else
                     {
-                        Console.WriteLine("Warning! Invalid value of 'CNS_TAG_HEIGHT' attribute encountered.");
+                        Debug.LogError("Warning! Invalid value of 'CNS_TAG_HEIGHT' attribute encountered.");
                     }
 
                     // 获取宽度
@@ -92,18 +96,18 @@ namespace Mission
                     }
                     else
                     {
-                        Console.WriteLine("Warning! Invalid value of 'CNS_TAG_WIDTH' attribute encountered.");
+                        Debug.LogError("Warning! Invalid value of 'CNS_TAG_WIDTH' attribute encountered.");
                     }
 
                     if (!(hasHeight && hasWidth))
                     {
-                        Console.WriteLine("Error! No 'CNS_TAG_WIDTH' or 'CNS_TAG_HEIGHT' attribute in 'CNS_TAG_GRID' tag!");
+                        Debug.LogError("Error! No 'CNS_TAG_WIDTH' or 'CNS_TAG_HEIGHT' attribute in 'CNS_TAG_GRID' tag!");
                         return false;
                     }
 
                     // 初始化网格
-                    Console.WriteLine("height is " + height);
-                    Console.WriteLine("width is " + width);
+                    //Debug.Log("height is " + height);
+                    //Debug.Log("width is " + width);
                     grid = new int[height][];
                     for (int i = 0; i < height; i++)
                     {
@@ -115,7 +119,7 @@ namespace Mission
                     {
                         if (element == null)
                         {
-                            Console.WriteLine($"Error! Not enough 'CNS_TAG_ROW' tags inside 'CNS_TAG_GRID' tag.");
+                            Debug.LogError($"Error! Not enough 'CNS_TAG_ROW' tags inside 'CNS_TAG_GRID' tag.");
                             return false;
                         }
 
@@ -137,14 +141,14 @@ namespace Mission
                             }
                             else
                             {
-                                Console.WriteLine($"Invalid value on grid in row {grid_i + 1}");
+                                Debug.LogError($"Invalid value on grid in row {grid_i + 1}");
                                 return false;
                             }
                         }
 
                         if (grid_j != width)
                         {
-                            Console.WriteLine($"Invalid value on 'CNS_TAG_GRID' in row {grid_i + 1}");
+                            Debug.LogError($"Invalid value on 'CNS_TAG_GRID' in row {grid_i + 1}");
                             return false;
                         }
 
@@ -166,7 +170,7 @@ namespace Mission
                         }
                         else 
                         {
-                            Console.WriteLine($"Warning! Invalid position of cross ({cross_i},{cross_j}) attribute encountered.");
+                            Debug.LogError($"Warning! Invalid position of cross ({cross_i},{cross_j}) attribute encountered.");
                             return false;
 
                         }
@@ -174,7 +178,7 @@ namespace Mission
                     }
                     else
                     {
-                        Console.WriteLine("Warning! Invalid value of 'CNS_TAG_CROSS' attribute encountered.");
+                        Debug.LogError("Warning! Invalid value of 'CNS_TAG_CROSS' attribute encountered.");
                         return false;
                     }
                 }
@@ -182,9 +186,10 @@ namespace Mission
 
             if (!hasGrid)
             {
-                Console.WriteLine("Error! There is no 'grid' tag in XML file!");
+                Debug.LogError("Error! There is no 'grid' tag in XML file!");
                 return false;
             }
+            
             return true;
         }
         public void ShowMap()
@@ -194,9 +199,9 @@ namespace Mission
             {
                 for (int j = 0; j < width; j++)
                 {
-                    Console.Write(grid[i][j] + " "); // 输出每个元素，使用Tab分隔
+                    Debug.Log(grid[i][j] + " "); // 输出每个元素，使用Tab分隔
                 }
-                Console.WriteLine(); // 每行结束换行
+                Debug.Log("\n"); // 每行结束换行
             }
         }
 
@@ -213,6 +218,28 @@ namespace Mission
         public bool CellOnGrid(int i, int j)
         {
             return (i < height && i >= 0 && j < width && j >= 0);
+        }
+        public Node RandomConnectingCell(Node conflicPosition)
+        {
+            int i = conflicPosition.i;
+            int j = conflicPosition.j;
+            
+            // 检查上边
+            if (i - 1 >= 0 && grid[i - 1][ j] == 0)
+                return new Node(i - 1, j);
+
+            // 检查下边
+            if (i + 1 < height && grid[i + 1][ j] == 0)
+                return new Node(i + 1, j);
+
+            // 检查左边
+            if (j - 1 >= 0 && grid[i][ j - 1] == 0)
+                return new Node(i, j - 1);
+
+            // 检查右边
+            if (j + 1 < width && grid[i][ j + 1] == 0)
+                return new Node(i, j + 1);
+            return null;
         }
 
         public int getValue(int i, int j)
@@ -268,7 +295,7 @@ namespace Mission
 
         public (int i, int j) getRandomAvalibleCell()
         {
-            Random random = new Random();
+            System.Random random = new System.Random();
             int randomCell = random.Next(0, emptyCellCount) + 1;
             int count = 0;
             for (int i = 0; i < height; i++)
@@ -290,7 +317,7 @@ namespace Mission
 
         public (int i, int j) getRandomAvalibleCross()
         {
-            Random random = new Random();
+            System.Random random = new System.Random();
             int randomCross = random.Next(0, crosses.Count - 1);
             if (crosses.TryGetValue(randomCross, out var coordinates))
             {
@@ -301,14 +328,14 @@ namespace Mission
                 }
                 else
                 {
-                    Console.WriteLine($"Cross ID {randomCross} invalid.");
+                    Debug.Log($"Cross ID {randomCross} invalid.");
                     return (0, 0);
                 }
 
             }
             else
             {
-                Console.WriteLine($"Cross ID {randomCross} not found.");
+                Debug.Log($"Cross ID {randomCross} not found.");
                 return (0, 0);
             }
         }

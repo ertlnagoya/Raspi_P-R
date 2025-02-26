@@ -21,6 +21,7 @@ namespace Display
         {
             empty = new GameObject().transform;
             GetComponent<CinemachineVirtualCamera>().Follow = empty;
+
         }
 
         void Update()

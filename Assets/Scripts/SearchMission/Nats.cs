@@ -27,6 +27,7 @@ namespace Mission
             var opts = ConnectionFactory.GetDefaultOptions();
             opts.Url = "nats://localhost:4222";
             connection = new ConnectionFactory().CreateConnection(opts);
+            Debug.Log($"Arbitrator connection building:");
         }
 
 
@@ -38,18 +39,12 @@ namespace Mission
                 ProcessIncomingMessage(args, goalSubject);
             });
 
-            // 监听 "ret" 主题
-            connection.SubscribeAsync(retSubject, (sender, args) =>
-            {
-                ProcessIncomingMessage(args, retSubject);
-            });
-
-            Debug.Log("[Nats] NATS Listeners Started.");
+            Debug.Log("[Arbitrator] NATS Listeners Started.");
         }
         private void ProcessIncomingMessage(MsgHandlerEventArgs args, string subject)
         {
             string message = Encoding.UTF8.GetString(args.Message.Data);
-            Debug.Log($"[Nats] Received {subject} Request: {message}");
+            Debug.Log($"[Arb] Received {subject} Request: {message}");
 
             Demand demand = JsonUtility.FromJson<Demand>(message);
 
@@ -57,7 +52,7 @@ namespace Mission
             OnDemandReceived?.Invoke(demand, subject);
         }
 
-        public void SendPath(Dictionary<int, int[]> path)
+        public void SendPath(Dictionary<int, List<int>> path)
         {
             if (path.Count == 0)
             {
@@ -79,7 +74,7 @@ namespace Mission
         {
             public List<RobotPath> paths = new List<RobotPath>();
 
-            public RobotPathsWrapper(Dictionary<int, int[]> robotPaths)
+            public RobotPathsWrapper(Dictionary<int, List<int>> robotPaths)
             {
                 foreach (var kvp in robotPaths)
                 {
@@ -92,27 +87,16 @@ namespace Mission
         private class RobotPath
         {
             public int id;
-            public int[] path;
+            public List<int> path;
 
-            public RobotPath(int id, int[] path)
+            public RobotPath(int id, List<int> path)
             {
                 this.id = id;
                 this.path = path;
             }
         }
 
-        public string SendRaw(string sub, Demand demand)
-        {
-            var msg = connection.Request(
-                sub, Encoding.UTF8.GetBytes(JsonUtility.ToJson(demand)),
-                1000 * 10);
-            return Encoding.UTF8.GetString(msg.Data);
-        }
-
-        public int Send(string sub, Demand demand)
-        {
-            return int.Parse(SendRaw(sub, demand));
-        }
+ 
 
     }
 }

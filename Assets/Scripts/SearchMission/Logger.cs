@@ -109,7 +109,7 @@ namespace Mission
             {
                 return;
             }
-            string relativePath = Path.Combine("python", logFileName);
+            string relativePath = Path.Combine(logFileName);
             string fullPath = Path.GetFullPath(relativePath);
             doc.Save(fullPath);
         }

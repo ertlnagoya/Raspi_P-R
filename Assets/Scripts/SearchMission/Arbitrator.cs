@@ -4,6 +4,7 @@ using LineTrace;
 using NATS.Client;
 using UnityEngine;
 using System.IO;
+using System.Security.Cryptography;
 
 namespace Mission
 {
@@ -13,7 +14,7 @@ namespace Mission
         private int agentsNumber;
         private Dictionary<int, Robot> robots = new Dictionary<int, Robot>();
         private List<int> priorityList = new List<int>();  // 按优先级存储机器人ID
-        private Dictionary<int, int[]> robotPaths = new Dictionary<int, int[]>();
+        private Dictionary<int, List<int>> robotPaths = new Dictionary<int, List<int>>();
         private string Configuration = "unity_case.xml";
 
         private void Awake()
@@ -21,6 +22,16 @@ namespace Mission
             nats = new Nats();
             nats.Subscribe();
             nats.OnDemandReceived += HandleDemand;  // 监听 Nats 传递的请求
+            Debug.Log("[Arbitrator] start.");
+        }
+
+        void Start()
+        {
+        }
+
+        void Update()
+        {
+            GetAllRobots();
         }
 
         private void HandleDemand(Demand demand, string subject)
@@ -34,7 +45,7 @@ namespace Mission
             }
             else if (subject == "ret")
             {
-                HandleRetRequest(demand);
+                //HandleRetRequest(demand);
             }
             else
             {
@@ -50,7 +61,7 @@ namespace Mission
         {
             
             Debug.Log($"[Arbitrator] Generating path for Goal Request: Id={demand.Id}");
-            RegisterRobot(demand.Id, demand.Src, demand.Dst, demand.Goal);
+            RegisterRobot(demand.Id, demand.Src, demand.Dst, demand.Goal, demand.Re);
             PathPlaning();
         }
 
@@ -60,51 +71,75 @@ namespace Mission
             UpdateRobot(demand.Id, demand.Src, demand.Dst);            
         }
 
-        void PathPlaning()
+        private void PathPlaning()
         {
-            string fileName = Path.Combine("Examples", Configuration);
+            Debug.Log("[P&R] Start planning");
+            
+            string fileName = Path.Combine(Application.dataPath, "Scripts", "SearchMission", "Examples", Configuration);
             MissionSearch mission = new MissionSearch(fileName);
+            //Debug.Log(fileName);
             if (!mission.GetMap())
             {
-                Debug.Log("Incorrect map! PathPlaning halted!");
+                Debug.LogError("Incorrect map! PathPlaning halted!");
             }
             else
             {
-
+                //Debug.Log("Get map!");
                 if (!mission.GetConfig())
-                    Debug.Log("Incorrect configurations! Program halted!");
+                    Debug.LogError("Incorrect configurations! Program halted!");
                 else
                 {
-
+                    Debug.Log("Get config!");
                     if (!mission.CreateLog())
-                        Debug.Log("Log channel has not been created! Program halted!");
+                        Debug.LogError("Log channel has not been created! Program halted!");
                     else
                     {
-                        Debug.Log("Start searching");
+                        //Debug.Log("Start searching");
                     }
 
                     mission.CreateAlgorithm();
-
                     int tasksCount = mission.getSingleExecution() ? 1 : mission.getTasksCount();
-
+                    //Debug.Log("Start 2");
                     for (int i = 0; i < tasksCount; i++)
                     {
                         string agentsFile = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                        if (!mission.creatUnityTask())
-                            Debug.Log("Agent set has not been created! Program halted!");
+                        
+                                              
+                        if (!mission.creatUnityTask(robots, priorityList))
+                            Debug.LogError("Agent set has not been created! Program halted!");
                         else if (mission.checkAgentsCorrectness(agentsFile))
                         {
-                            Debug.Log("Starting search for agents file " + agentsFile);
+                            //Debug.Log("Starting search for agents file " + agentsFile);
                             mission.startSearch(agentsFile);
-                            robotPaths = mission.getResults();
+                            robotPaths = mission.getResults(priorityList);
                         }
                     }
-                    Debug.Log("All searches are finished!");
+                    Debug.Log("[P&R] All searches are finished!");
                 }
             }
         }
 
-        public void RegisterRobot(int id, int src, int dst, int goal)
+        private void GetAllRobots()
+        {
+            Pilot[] allPilot = FindObjectsOfType<Pilot>(true);
+            foreach (Pilot pilot in allPilot)
+            {
+                if (!robots.ContainsKey(pilot.id))
+                {
+                    robots[pilot.id] = new Robot(pilot.id, pilot.src, pilot.dst, pilot.goal);
+                    priorityList.Add(pilot.id);  // 将机器人ID加入优先级列表
+                    //Debug.Log($"Robot {pilot.id} registered at point {pilot.src} to {pilot.dst}");
+                }
+                else
+                {
+                    robots[pilot.id].UpdateInfo(pilot.src, pilot.dst, pilot.goal);
+                    UpdateRobotPriority(pilot.id);
+                    //Debug.Log($"Robot {pilot.id} updated: new src={pilot.src}, new dst={pilot.dst}, new goal={pilot.goal}");
+                }
+            }
+        }
+
+        public void RegisterRobot(int id, int src, int dst, int goal, bool re)
         {
             if (!robots.ContainsKey(id))
             {
@@ -115,6 +150,7 @@ namespace Mission
             else
             {
                 robots[id].UpdateInfo(src, dst, goal);
+                if (re)
                 UpdateRobotPriority(id);
                 Debug.Log($"Robot {id} updated: new src={src}, new dst={dst}, new goal={goal}");
             }

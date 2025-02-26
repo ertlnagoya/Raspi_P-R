@@ -24,9 +24,10 @@ namespace LineTrace
         private Cross preCross = null;
         private float radius = 0f;
         private bool reted = true;
-        private bool isMoving = false;
+        //private bool isMoving = false;
 
         private float reTime;
+        public float capsuleRadius = 0.03f;
 
         private string[] RMColor = { "Red", "Blue", "Green", "Yellow", "Purple", "Orange", "Pink", "Brown", "Gray", "White" };
         private List<int> targetPointIndices = new List<int>();  // 存储目标点序号
@@ -39,35 +40,51 @@ namespace LineTrace
             handler = new Handler(mouse, RMColor[id]);
             nats = new Nats();
             nats.Subscribe(ChangeTargetPoints, id);
+            
 
-            goal = RandomGoal(-1);
-            nats.Send("goal", new Demand {Id = id, Src = src, Dst = dst, Goal = goal});
         }
-
+        private void Start()
+        {
+            SphereCollider capsule = GetComponent<SphereCollider>();
+            if (capsule != null)
+            {
+                capsuleRadius = 0.03f;
+                capsule.radius = capsuleRadius;               
+            }
+            else
+            {
+                Debug.LogError("该游戏对象没有 CapsuleCollider 组件！");
+            }
+            Debug.Log($"[start] robot {id} start from {src} to {dst}");
+            goal = RandomGoal(-1);
+            nats.Send("goal", new Demand { Id = id, Src = src, Dst = dst, Goal = goal });
+            
+        }
         private void ChangeTargetPoints(int[] newTargetIndices)
         {
+            Debug.Log("Reseived path.");
             targetPointIndices.Clear();
             targetPointIndices.AddRange(newTargetIndices);
             currentTargetIndex = 0;
-            isMoving = true;
+            //isMoving = true;
 
             Debug.Log($"New path received: {string.Join(", ", targetPointIndices)}");
 
             if (targetPointIndices.Count == 0)
             {
                 Debug.LogWarning("No target points available.");
-                nats.Send("goal", new Demand { Id = id, Src = src, Dst = dst, Goal = goal });
-                return;
+                nats.Send("goal", new Demand { Id = id, Src = src, Dst = dst, Goal = goal, Re = true });
+                //return;
             }
             if (dst != targetPointIndices[0])  // 起点
             {
-                Debug.Log("Last point is NOT the end point.");
-                return;
+                Debug.Log($"first point {targetPointIndices[0]} is NOT the start point {dst}.");
+                //return;
             }
             if (goal != targetPointIndices[targetPointIndices.Count - 1])  // endPointIndex 是终点索引
             {
-                Debug.Log("Last point is NOT the end point.");
-                return;
+                Debug.Log($"Last point {targetPointIndices[targetPointIndices.Count - 1]} is NOT the end point {goal}.");
+                //return;
             }
 
 
@@ -84,7 +101,8 @@ namespace LineTrace
                 {
                     re--;
                     reTime = 0f;
-                    nats.Send("goal", new Demand {Id = id, Src = src, Dst = dst, Goal = goal, Re = re == 0});
+                    Debug.Log("conflict ---> repaln from cuerrent position");
+                    nats.Send("goal", new Demand {Id = id, Src = src, Dst = dst, Goal = goal, Re = false});
                 }
             }
             else
@@ -93,7 +111,7 @@ namespace LineTrace
                 if (!reted && preCross && (preCross.transform.position - transform.position).magnitude > 0.05f)
                 {
                     reted = true;
-                    nats.Send("ret", new Demand {Id = id, Src = src, Dst = dst});
+                    //nats.Send("ret", new Demand {Id = id, Src = src, Dst = dst});
                 }
             }
         }
@@ -105,16 +123,16 @@ namespace LineTrace
             if (!cross || preCross == cross) return;
             preCross = cross;
             radius = other.GetComponent<CapsuleCollider>().radius;
-
+            Debug.Log($"[Collider] robot {id} start from {src} to {dst} and cross is {cross.name}");
             if (!reted)
             {
-                nats.Send("ret", new Demand {Id = id, Src = src, Dst = dst});
+                //nats.Send("ret", new Demand {Id = id, Src = src, Dst = dst});
                 reted = true;
             }
 
             if (cross.number != dst)
             {
-                print($"failed : {src} -> {dst} != {cross.number}");
+                //print($"failed : {src} -> {dst} != {cross.number}");
                 dst = cross.number;
             }
 
@@ -122,7 +140,7 @@ namespace LineTrace
             {
                 level++;
                 goal = RandomGoal(goal);
-                nats.Send("goal", new Demand { Id = id, Src = src, Dst = dst, Goal = goal, Re = false });
+                nats.Send("goal", new Demand { Id = id, Src = src, Dst = dst, Goal = goal, Re = true });
                 print("[Goal]" + " RM: " + RMColor[id] + " Goal count: " + level + " time[s]: " + Time.time);
             }
 
@@ -132,11 +150,11 @@ namespace LineTrace
                 var next = targetPointIndices[currentTargetIndex];
                 SetNext(next);
             }
-            else
+            else if (currentTargetIndex + 1 >= targetPointIndices.Count)
             {
-                Debug.Log("Error in the plan ---> repaln from cuerrent position");
-                handler.SetBack();
-                nats.Send("goal", new Demand { Id = id, Src = dst, Dst = src, Goal = goal, Re = true });
+                //Debug.Log("Error in the plan ---> repaln from cuerrent position");
+                //handler.SetBack();
+                //nats.Send("goal", new Demand { Id = id, Src = dst, Dst = src, Goal = goal, Re = false });
             }    
         }
 
@@ -145,12 +163,20 @@ namespace LineTrace
             if (src == next)
             {
                 handler.SetBack();
-                nats.Send("ret", new Demand {Id = id, Src = dst, Dst = src});
+                //nats.Send("ret", new Demand {Id = id, Src = dst, Dst = src});
             }
             else
             {
                 reted = false;
-                handler.SetCross(preCross.transform.position, preCross.GetDir(next));
+                try
+                {
+                    handler.SetCross(preCross.transform.position, preCross.GetDir(next));
+                }
+                catch (System.Exception e)
+                {
+                    Debug.Log("Error in getdir()" + e.Message);
+                }
+
             }
 
             src = preCross.number;
@@ -159,6 +185,7 @@ namespace LineTrace
             {
                 print($"{src} == {dst}");
             }
+            Debug.Log($"[setNext] robot {id} start from {src} to {dst}");
         }
 
 //        private void OnTriggerExit(Collider other)

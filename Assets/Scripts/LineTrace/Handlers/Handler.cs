@@ -47,7 +47,7 @@ namespace LineTrace.Handlers
             {
                 if (backHandler.Update()) action = CarAction.Go;
             } 
-            else if (Mathf.Min(mouse.distSensor.Distance(0), mouse.distSensor.Distance(3)) < 0.1f)
+            else if (Mathf.Min(mouse.distSensor.Distance(0), mouse.distSensor.Distance(3)) < 0.15f)  //detect collider or? 
             {
                 t += Time.deltaTime;
                 if (t > maxT)

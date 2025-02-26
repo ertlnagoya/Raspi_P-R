@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Unity.VisualScripting;
+using System.Xml;
 
 namespace Mission
 {
@@ -40,6 +42,7 @@ namespace Mission
         // 获取地图
         public bool GetMap()
         {
+            
             return map.GetMap(mapFile);
         }
 
@@ -105,7 +108,7 @@ namespace Mission
         {
             if (config.maxAgents != -1 && agentSet.getAgentCount() < config.maxAgents)
             {
-                Console.WriteLine($"Warning: not enough agents in {agentsFile} agents file. This file will be ignored");
+                UnityEngine.Debug.Log($"Warning: not enough agents in {agentsFile} agents file. This file will be ignored");
                 return false;
             }
 
@@ -118,7 +121,7 @@ namespace Mission
                 if (!map.CellOnGrid(start.i, start.j) || !map.CellOnGrid(goal.i, goal.j) ||
                     map.CellIsObstacle(start.i, start.j) || map.CellIsObstacle(goal.i, goal.j))
                 {
-                    Console.WriteLine($"Warning: start or goal position of agent {agent.getId()} in {agentsFile} agents file is incorrect. This file will be ignored");
+                    UnityEngine.Debug.Log($"Warning: start or goal position of agent {agent.getId()} in {agentsFile} agents file is incorrect. This file will be ignored");
                     return false;
                 }
             }
@@ -129,13 +132,15 @@ namespace Mission
                 {
                     if (agentSet.getAgent(i).getStartPosition().Equals(agentSet.getAgent(j).getStartPosition()))
                     {
-                        Console.WriteLine($"Warning: start positions of agents {i} and {j} in {agentsFile} are in the same cell. This file will be ignored");
+                        UnityEngine.Debug.Log($"Warning: start positions of agents {i} and {j} in {agentsFile} are in the same cell. This file will be ignored");
                         return false;
                     }
                     else if (agentSet.getAgent(i).getGoalPosition().Equals(agentSet.getAgent(j).getGoalPosition()))
                     {
-                        Console.WriteLine($"Warning: goal positions of agents {i} and {j} in {agentsFile} are in the same cell. This file will be ignored");
-                        return false;
+                        UnityEngine.Debug.Log($"Warning: goal positions of agents {i} and {j} in {agentsFile} are in the same cell. This file will be ignored");
+                        Node conflicPosition = agentSet.getAgent(j).getGoalPosition();
+                        agentSet.getAgent(j).setGoalPosition(map.RandomConnectingCell(conflicPosition));
+                       // return true;
                     }
                 }
             }
@@ -151,7 +156,7 @@ namespace Mission
 
             TestingResults res = new TestingResults();
             //Console.WriteLine("minAgents is " + minAgents);
-            Console.WriteLine("AGENT number is " + maxAgents);
+            //UnityEngine.Debug.Log("AGENT number is " + maxAgents);
             //Console.WriteLine("agentsStep is " + config.agentsStep);
 
             for (int i = minAgents; i <= maxAgents; i += config.agentsStep)
@@ -169,19 +174,19 @@ namespace Mission
                 var clockStart = DateTime.Now;
 
                 sr = multiagentSearch.startSearch(map, config, curAgentSet);
-
+                //UnityEngine.Debug.Log($"search result is {sr.pathfound}");
                 chronoTimer.Stop();
-                Console.WriteLine($"Chrono time: {chronoTimer.ElapsedMilliseconds} ms");
+                UnityEngine.Debug.Log($"[P&R] Chrono time: {chronoTimer.ElapsedMilliseconds} ms");
 
                 var clockEnd = DateTime.Now;
-                Console.WriteLine($"Clock time: {(clockEnd - clockStart).TotalMilliseconds} ms");
+                UnityEngine.Debug.Log($"[P&R] Clock time: {(clockEnd - clockStart).TotalMilliseconds} ms");
 
                 if (!sr.pathfound)
                 {
-                    Console.WriteLine($"Failed to find solution for {i} agents");
+                    UnityEngine.Debug.LogError($"Failed to find solution for {i} agents");
                     if (config.singleExecution)
                     {
-                        Console.WriteLine("Log will not be created");
+                        UnityEngine.Debug.LogError("Log will not be created");
                     }
                     break;
                 }
@@ -201,23 +206,32 @@ namespace Mission
                 res.finalHLNodesStart[i] = (int)sr.finalHLNodesStart;
                 res.finalHLExpansions[i] = (int)sr.finalHLExpansions;
                 res.finalHLExpansionsStart[i] = (int)sr.finalHLExpansionsStart;
-
+                //UnityEngine.Debug.Log($"search result is {agentsFile}");
                 if (config.singleExecution)
                 {
 
-                    saveAgentsPathsToLog(agentsFile, sr.time[^1], sr.makespan[^1], sr.flowtime[^1],
-                     0, 0,
-                     0, 0,
-                     0, 0);
+                    try
+                    {
+                        saveAgentsPathsToLog(agentsFile, sr.time[^1], sr.makespan[^1], sr.flowtime[^1],
+                                              0, 0,
+                                              0, 0,
+                                              0, 0);
+                    }
+                    catch (Exception ex)
+                    {
+                        // 捕获异常后可以在这里处理，比如记录日志或输出错误信息
+                        UnityEngine.Debug.Log("调用 saveAgentsPathsToLog 时发生异常: " + ex.Message);
+                        // 如果需要，还可以将异常写入日志文件或执行其他恢复操作
+                    }
                 }
 
                 if (!checkCorrectness())
                 {
-                    Console.WriteLine("Search returned incorrect results!");
+                    UnityEngine.Debug.LogError("Search returned incorrect results!");
                     break;
                 }
 
-                Console.WriteLine($"Found solution for {i} agents. Time: {sr.time[^1]}, flowtime: {sr.flowtime[^1]}, makespan: {sr.makespan[^1]}");
+                UnityEngine.Debug.Log($"[P&R] Found solution for {i} agents. Time: {sr.time[^1]}, flowtime: {sr.flowtime[^1]}, makespan: {sr.makespan[^1]}");
             }
 
             testingResults.Add(res);
@@ -272,13 +286,13 @@ namespace Mission
             {
                 if (!agentsPaths[j][0].Equals(agentSet.getAgent(j).getStartPosition()))
                 {
-                    Console.WriteLine("Incorrect result: agent path starts in wrong position!");
+                    UnityEngine.Debug.LogError("[P&R] Incorrect result: agent path starts in wrong position!");
                     return false;
                 }
 
                 if (!agentsPaths[j][agentsPaths[j].Count - 1].Equals(agentSet.getAgent(j).getGoalPosition()))
                 {
-                    Console.WriteLine("Incorrect result: agent path ends in wrong position!");
+                    UnityEngine.Debug.LogError("[P&R] Incorrect result: agent path ends in wrong position!");
                     return false;
                 }
 
@@ -297,7 +311,7 @@ namespace Mission
 
                     if (map.CellIsObstacle(agentsPaths[j][i].i, agentsPaths[j][i].j))
                     {
-                        Console.WriteLine("Incorrect result: agent path goes through obstacle!");
+                        UnityEngine.Debug.LogError("[P&R] Incorrect result: agent path goes through obstacle!");
                         return false;
                     }
 
@@ -305,7 +319,7 @@ namespace Mission
                         Math.Abs(agentsPaths[j][i].i - agentsPaths[j][i - 1].i) +
                         Math.Abs(agentsPaths[j][i].j - agentsPaths[j][i - 1].j) > 1)
                     {
-                        Console.WriteLine("Incorrect result: consecutive nodes in agent path are not adjacent!");
+                        UnityEngine.Debug.LogError("[P&R] Incorrect result: consecutive nodes in agent path are not adjacent!");
                         return false;
                     }
                 }
@@ -344,19 +358,19 @@ namespace Mission
             
             if (robots == null || priorityList == null)
             {
-                UnityEngine.Debug.LogError("Error: Robots dictionary or priority list is null.");
+                UnityEngine.Debug.LogError("[P&R] Error: Robots dictionary or priority list is null.");
                 return false;
             }
 
             if (robots.Count == 0)
             {
-                UnityEngine.Debug.LogError("Error: Robots dictionary is empty.");
+                UnityEngine.Debug.LogError("[P&R] Error: Robots dictionary is empty.");
                 return false;
             }
 
             if (priorityList.Count == 0)
             {
-                UnityEngine.Debug.LogError("Error: Priority list is empty.");
+                UnityEngine.Debug.LogError("[P&R] Error: Priority list is empty.");
                 return false;
             }
             
@@ -364,21 +378,76 @@ namespace Mission
             {
                 if (!priorityList.Contains(robotId))
                 {
-                    UnityEngine.Debug.LogError($"Error: Robot ID {robotId} is not in the priority list.");
+                    UnityEngine.Debug.LogError($"[P&R] Error: Robot ID {robotId} is not in the priority list.");
                     return false;
                 }
             }
 
-            UnityEngine.Debug.Log("CreateUnityTask: All checks passed.");
+            agentSet.Clear();
+            foreach (int robotId in priorityList)
+            {
+                int start_i = 0, start_j = 0, goal_i = 0, goal_j = 0;
+                if (robots.TryGetValue(robotId, out Robot robot))
+                {
+                    ParsePosition(robot.Dst, out start_i, out start_j);
+                    ParsePosition(robot.Goal, out goal_i, out goal_j);
+                    agentSet.addAgent(start_i, start_j, goal_i, goal_j);
+                }
+            }                    
             return true;
 
         }
-        public Dictionary<int, int[]> getResults()
+        public Dictionary<int, List<int>> getResults(List<int> priorityList)
         {
-            Dictionary<int, int[]> paths = new Dictionary<int, int[]>();
+            Dictionary<int, List<int>> paths = new Dictionary<int, List<int>>();
+            for (int i = 0; i < agentsPaths.Count; ++i)
+            {
+                int positionStart = 0;
+                int positionEnd = 0;
 
+                Agent agent = agentSet.getAgent(i);
+                var robotID = priorityList[i];
+                ParseNode(agent.getStart_i(), agent.getStart_j(), out positionStart);
+                ParseNode(agent.getGoal_i(), agent.getGoal_j(), out positionEnd);
+                AddPositionToPath(robotID, positionStart, paths);
+
+                for (int j = 0; j < agentsPaths[i].Count - 1; ++j)
+                {
+                    int positionMiddle = 0;
+                    Node curNode = agentsPaths[i][j];
+                    Node nextNode = agentsPaths[i][j + 1];
+                    ParseNode(nextNode.i, nextNode.j, out positionMiddle);
+                    AddPositionToPath(robotID, positionMiddle, paths);
+                    //sectionElement.SetAttribute(Constants.CNS_TAG_ATTR_STARTX, curNode.j.ToString());
+                    //sectionElement.SetAttribute(Constants.CNS_TAG_ATTR_STARTY, curNode.i.ToString());
+                }
+            }
             return paths;
         }
+
+        private void ParsePosition(int position, out int i, out int j)
+        {
+            j = position % 17;  // 计算 b
+            i = position / 17;  // 计算 a
+        }
+
+        private void ParseNode(int i, int j, out int position)
+        {
+            position = i * 17 + j; // Caution! different with ParsePosition
+        }
+
+        private void AddPositionToPath(int robotID, int position, Dictionary<int, List<int>> paths)
+        {
+            if (!paths.ContainsKey(robotID))
+            {
+                // 如果 robotID 还没有路径，创建一个新的 List
+                paths[robotID] = new List<int>();
+            }
+
+            // 添加新位置到路径中
+            paths[robotID].Add(position);
+        }
+
     }
 }
 

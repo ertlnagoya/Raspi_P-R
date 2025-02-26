@@ -9,6 +9,7 @@ namespace LineTrace
 
         public int[] nexts = {-1, -1, -1, -1};
         private Vector3[] _pivs = new Vector3[4];
+        public float capsuleRadius = 0.03f;
 
         private void Awake()
         {
@@ -16,7 +17,31 @@ namespace LineTrace
             for (int i = 0; i < 4; i++)
             {
                 if (nexts[i] == -1) continue;
-                _pivs[i] = transform.Find($"dir{nexts[i]}").position;
+                Transform target = transform.Find($"dir{nexts[i]}");
+
+                if (target != null)
+                {
+                    _pivs[i] = target.position;
+                }
+                else
+                {
+                    Debug.LogError($"[{gameObject.name}] 找不到子对象 'dir{nexts[i]}'！");
+                }
+            }
+        }
+
+        private void Start()
+        {
+            CapsuleCollider capsule = GetComponent<CapsuleCollider>();
+            if (capsule != null)
+            {
+                capsuleRadius = 0.02f;
+                capsule.radius = capsuleRadius;
+                capsule.height = 2;              
+            }
+            else
+            {
+                Debug.LogError("该游戏对象没有 CapsuleCollider 组件！");
             }
         }
 
@@ -36,7 +61,7 @@ namespace LineTrace
                 }
             }
 
-            throw new Exception($"{number} -/-> {next}");
+            throw new Exception($"try from {number} -/-> {next}");
         }
     }
 }

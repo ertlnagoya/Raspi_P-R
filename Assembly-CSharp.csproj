@@ -99,7 +99,6 @@
     <Compile Include="Assets\Scripts\LineTrace\RouteSearch.cs" />
     <Compile Include="Assets\Scripts\RasPiMouse\Device\Lidar.cs" />
     <Compile Include="Assets\Scripts\Display\EdgeDisp.cs" />
-    <Compile Include="Assets\Scripts\SearchMission\Program.cs" />
     <Compile Include="Assets\Scripts\LineTrace\Demand.cs" />
     <Compile Include="Assets\Scripts\SearchMission\Map.cs" />
     <Compile Include="Assets\Scripts\Display\GoalCursor.cs" />

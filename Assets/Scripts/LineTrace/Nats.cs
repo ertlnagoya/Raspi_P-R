@@ -9,11 +9,6 @@ using Mission;
 
 namespace LineTrace
 {
-    [System.Serializable]
-    public class IntArrayWrapper
-    {
-        public int[] values;
-    }
     public class Nats
     {
         private readonly IConnection connection;
@@ -24,6 +19,7 @@ namespace LineTrace
             var opts = ConnectionFactory.GetDefaultOptions();
             opts.Url = "nats://localhost:4222";
             connection = new ConnectionFactory().CreateConnection(opts);
+            Debug.Log($"pilot connection building:");
         }
 
         /// <summary>
@@ -49,9 +45,9 @@ namespace LineTrace
                     RobotPathsWrapper receivedPaths = JsonUtility.FromJson<RobotPathsWrapper>(message);
                     RobotPath robotPath = receivedPaths.paths.Find(path => path.id == robotId);
 
-                    if (robotPath != null && robotPath.path.Length > 0)  // 确保有目标点
+                    if (robotPath != null && robotPath.path.Count > 0)  
                     {
-                        onMessageReceived?.Invoke(robotPath.path);
+                        onMessageReceived?.Invoke(robotPath.path.ToArray());  
                     }
                     else
                     {
@@ -65,20 +61,20 @@ namespace LineTrace
             };
 
             sub.Start();
-            Debug.Log("NATS Listener started.");
+            Debug.Log("pilot NATS Listener started.");
         }
 
-        public string SendRaw(string sub, Demand demand)
+        public void SendRaw(string sub, Demand demand)
         {
-            var msg = connection.Request(
-                sub, Encoding.UTF8.GetBytes(JsonUtility.ToJson(demand)),
-                1000 * 10);
-            return Encoding.UTF8.GetString(msg.Data);
+            connection.Publish(sub, Encoding.UTF8.GetBytes(JsonUtility.ToJson(demand)));
+            return;
         }
 
-        public int Send(string sub, Demand demand)
+        public void Send(string sub, Demand demand)
         {
-            return int.Parse(SendRaw(sub, demand));
+            if(sub == "goal")
+            SendRaw(sub, demand);
+            return;
         }
 
         public string SendRaw_CSoS(string sub, Demand_CSoS demand)
@@ -183,7 +179,7 @@ namespace LineTrace
         {
             public List<RobotPath> paths = new List<RobotPath>();
 
-            public RobotPathsWrapper(Dictionary<int, int[]> robotPaths)
+            public RobotPathsWrapper(Dictionary<int, List<int>> robotPaths)
             {
                 foreach (var kvp in robotPaths)
                 {
@@ -196,14 +192,13 @@ namespace LineTrace
         private class RobotPath
         {
             public int id;
-            public int[] path;
+            public List<int> path;
 
-            public RobotPath(int id, int[] path)
+            public RobotPath(int id, List<int> path)
             {
                 this.id = id;
                 this.path = path;
             }
         }
     }
-}
 }

@@ -170,6 +170,8 @@ namespace Mission
             agents.Add(new Agent(start_i, start_j, goal_i, goal_j, agents.Count));
         }
 
+
+
         public int getAgentId(int i, int j)
         {
             return occupiedNodes[(i, j)];

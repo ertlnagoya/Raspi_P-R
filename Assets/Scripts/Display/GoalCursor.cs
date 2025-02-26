@@ -5,7 +5,7 @@ namespace Display
 {
     public class GoalCursor : MonoBehaviour
     {
-        public Pilot pilot;
+        public PilotSync pilot;
         private int preNum = -1;
 
         void Start()

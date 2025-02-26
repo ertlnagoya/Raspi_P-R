@@ -121,8 +121,8 @@ namespace Mission
 
         private void GetAllRobots()
         {
-            Pilot[] allPilot = FindObjectsOfType<Pilot>(true);
-            foreach (Pilot pilot in allPilot)
+            PilotSync[] allPilot = FindObjectsOfType<PilotSync>(true);
+            foreach (PilotSync pilot in allPilot)
             {
                 if (!robots.ContainsKey(pilot.id))
                 {

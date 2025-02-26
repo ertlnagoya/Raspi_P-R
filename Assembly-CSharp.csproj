@@ -71,11 +71,13 @@
     <Compile Include="Assets\Scripts\LineTrace\Pilot.cs" />
     <Compile Include="Assets\Scripts\LineTrace\Handlers\GoHandler.cs" />
     <Compile Include="Assets\Scripts\RasPiMouse\Device\DistSensorUnit.cs" />
+    <Compile Include="Assets\Scripts\SearchMission\ArbitratorSync.cs" />
     <Compile Include="Assets\Scripts\SearchMission\Constants.cs" />
     <Compile Include="Assets\Scripts\RasPiMouse\Device\LineSensorUnit.cs" />
     <Compile Include="Assets\Scripts\SearchMission\SearchResult.cs" />
     <Compile Include="Assets\Scripts\Display\ScoreDisp.cs" />
     <Compile Include="Assets\Scripts\SearchMission\Demand.cs" />
+    <Compile Include="Assets\Scripts\LineTrace\PilotSync.cs" />
     <Compile Include="Assets\Scripts\SearchMission\ConflictSet.cs" />
     <Compile Include="Assets\Scripts\LineTrace\Road.cs" />
     <Compile Include="Assets\Scripts\SearchMission\ConflictBasedSearch.cs" />

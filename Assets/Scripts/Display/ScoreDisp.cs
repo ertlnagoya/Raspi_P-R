@@ -10,7 +10,7 @@ namespace Display
 {
     public class ScoreDisp : MonoBehaviour
     {
-        public Pilot[] pilots;
+        public PilotSync[] pilots;
         private TextMeshProUGUI text;
 
         private float t;

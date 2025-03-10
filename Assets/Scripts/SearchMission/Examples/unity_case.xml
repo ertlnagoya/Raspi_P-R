@@ -1,36 +1,32 @@
 <?xml version="1.0" ?>
 <root>
     <map>
-        <grid width="17" height="17">
-            <row>1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0</row>
-            <row>0 0 0 0 0 0 0 0 0 0 1 1 0 1 1 1 0</row>
-            <row>0 1 1 1 1 0 1 1 1 1 1 1 0 1 1 0 0</row>
-            <row>0 0 0 1 1 0 0 1 1 1 1 0 0 1 1 0 1</row>
-            <row>1 1 0 1 1 1 0 0 0 0 1 0 1 1 1 0 1</row>
-            <row>1 1 0 1 0 0 0 1 1 0 1 0 1 1 1 0 1</row>
-            <row>0 0 0 0 0 1 1 0 0 0 1 0 1 1 1 0 1</row>
-            <row>0 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 1</row>
-            <row>0 1 0 0 0 0 1 0 0 0 1 0 1 0 0 0 1</row>
-            <row>0 1 0 1 1 0 1 1 1 0 1 0 0 1 1 0 1</row>
-            <row>0 1 0 1 1 0 1 0 0 0 1 1 0 1 0 0 1</row>
-            <row>0 1 0 1 1 0 1 0 1 1 1 0 0 1 0 1 1</row>
-            <row>0 0 0 1 1 0 0 0 0 0 1 0 1 1 0 0 0</row>
-            <row>0 1 1 1 1 1 1 0 1 0 1 0 0 0 1 1 0</row>
-            <row>0 1 1 1 0 0 0 0 1 0 1 1 1 0 0 0 0</row>
-            <row>0 0 0 0 0 1 1 1 1 0 1 1 1 0 1 1 1</row>
-            <row>1 1 1 1 0 0 0 0 0 0 0 0 0 0 1 1 1</row>
+        <grid width="13" height="13">
+            <row>1 0 0 0 0 0 0 0 0 0 0 0 0</row>
+            <row>1 0 1 1 1 0 1 1 1 1 0 1 0</row>
+            <row>1 0 1 1 1 0 1 1 1 0 0 1 0</row>
+            <row>0 0 0 0 0 0 0 0 1 0 1 1 0</row>
+            <row>0 1 1 1 1 1 1 0 1 0 0 0 0</row>
+            <row>0 1 0 0 0 0 1 0 1 0 1 1 0</row>
+            <row>0 0 0 1 1 0 1 0 1 0 1 1 0</row>
+            <row>1 0 1 0 0 0 0 0 1 0 1 1 0</row>
+            <row>1 0 1 0 1 0 1 1 1 0 1 1 0</row>
+            <row>1 0 0 0 1 0 0 1 1 0 0 1 0</row>
+            <row>1 1 0 1 1 1 0 1 1 1 0 0 0</row>
+            <row>1 1 0 0 0 0 0 0 0 0 0 1 1</row>
+            <row>1 1 1 1 1 1 1 1 1 1 1 1 1</row>
         </grid>
-        <cross id="0" grid_i="15" grid_j="4"/>
-        <cross id="1" grid_i="16" grid_j="9"/>
-        <cross id="2" grid_i="14" grid_j="13"/>
-        <cross id="3" grid_i="8" grid_j="15"/>
-        <cross id="4" grid_i="0" grid_j="12"/>
-        <cross id="5" grid_i="1" grid_j="5"/>
-        <cross id="6" grid_i="6" grid_j="2"/>
-        <cross id="7" grid_i="12" grid_j="0"/>
-        <cross id="8" grid_i="12" grid_j="7"/>
-        <cross id="9" grid_i="4" grid_j="6"/>
-        <cross id="10" grid_i="7" grid_j="11"/>
+        <cross id="0" grid_i="9" grid_j="2"/>
+        <cross id="1" grid_i="11" grid_j="6"/>
+        <cross id="2" grid_i="10" grid_j="10"/>
+        <cross id="3" grid_i="4" grid_j="12"/>
+        <cross id="4" grid_i="0" grid_j="10"/>
+        <cross id="5" grid_i="0" grid_j="5"/>
+        <cross id="6" grid_i="6" grid_j="1"/>
+        <cross id="7" grid_i="9" grid_j="2"/>
+        <cross id="8" grid_i="7" grid_j="5"/>
+        <cross id="9" grid_i="3" grid_j="5"/>
+        <cross id="10" grid_i="4" grid_j="9"/>
     </map>
     <algorithm>
         <planner>pr</planner>

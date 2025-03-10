@@ -64,6 +64,40 @@ namespace LineTrace
             Debug.Log("pilot NATS Listener started.");
         }
 
+        public void SubscribeSync(Action<int> onMessageReceived, int robotId)
+        {
+            IAsyncSubscription sub = connection.SubscribeAsync(subject);
+
+            sub.MessageHandler += (sender, args) =>
+            {
+                try
+                {
+                    string message = Encoding.UTF8.GetString(args.Message.Data);
+                    
+
+                    // 解析 JSON 数据
+                    AgentNextPositionWrapper receivedData = JsonUtility.FromJson<AgentNextPositionWrapper>(message);
+                    AgentNextPosition agentData = receivedData.agents.Find(agent => agent.id == robotId);
+                    //Debug.Log($"Received NATS message: 'id': {agentData.id} next is {agentData.nextPosition}");
+                    if (agentData != null)
+                    {
+                        onMessageReceived?.Invoke(agentData.nextPosition);
+                    }
+                    else
+                    {
+                        Debug.LogError($"No data found for robot ID {robotId}.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"Error processing NATS message: {ex.Message}");
+                }
+            };
+
+            sub.Start();
+            Debug.Log("pilot NATS Listener started.");
+        }
+
         public void SendRaw(string sub, Demand demand)
         {
             connection.Publish(sub, Encoding.UTF8.GetBytes(JsonUtility.ToJson(demand)));
@@ -198,6 +232,33 @@ namespace LineTrace
             {
                 this.id = id;
                 this.path = path;
+            }
+        }
+
+        [Serializable]
+        private class AgentNextPositionWrapper
+        {
+            public List<AgentNextPosition> agents = new List<AgentNextPosition>();
+
+            public AgentNextPositionWrapper(Dictionary<int, int> agentPositions)
+            {
+                foreach (var kvp in agentPositions)
+                {
+                    agents.Add(new AgentNextPosition(kvp.Key, kvp.Value));
+                }
+            }
+        }
+
+        [Serializable]
+        private class AgentNextPosition
+        {
+            public int id;
+            public int nextPosition;
+
+            public AgentNextPosition(int id, int nextPosition)
+            {
+                this.id = id;
+                this.nextPosition = nextPosition;
             }
         }
     }

@@ -23,6 +23,7 @@ namespace Display
         private void Start()
         {
             text = GetComponent<TextMeshProUGUI>();
+
         }
 
         private void Update()

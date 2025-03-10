@@ -5,6 +5,7 @@ using NATS.Client;
 using UnityEngine;
 using System.IO;
 using System.Security.Cryptography;
+using System.Linq;
 
 namespace Mission
 {
@@ -16,11 +17,12 @@ namespace Mission
         private List<int> priorityList = new List<int>();  // 按优先级存储机器人ID
         private Dictionary<int, List<int>> robotPaths = new Dictionary<int, List<int>>();
         private string Configuration = "unity_case.xml";
+        private int pathIndex = 0;
 
         private void Awake()
         {
             nats = new Nats();
-            nats.Subscribe();
+            nats.SubscribeSync();
             nats.OnDemandReceived += HandleDemand;  // 监听 Nats 传递的请求
             Debug.Log("[Arbitrator] start.");
         }
@@ -32,6 +34,87 @@ namespace Mission
         void Update()
         {
             GetAllRobots();
+            CheckAndSendNext();
+        }
+
+        public void CheckAndSendNext()
+        {
+            // 确保所有机器人都满足 Src == Dst
+            bool allReached = robots.Values.All(robot => robot.Src == robot.Dst);
+
+            if (!allReached)
+                return;
+            if (robotPaths.Count == 0)
+            {
+                Debug.Log("Error: robotPaths is empty!");
+                PathPlaning();
+                pathIndex = 0;   // 归零 pathIndex
+                pathIndex++;     // 规划后立刻进入下一步
+                SendNext();
+                return;
+            }
+            foreach (var robot in robots.Values)
+            {
+                if (!robotPaths.ContainsKey(robot.Id))
+                {
+                    Debug.LogError($"Error: No path found for robot {robot.Id}. Replanning...");                    
+                    return;
+                }
+            }          
+            if (!CheckNextExist())
+            {
+                PathPlaning();
+                pathIndex = 0;   // 归零 pathIndex
+                pathIndex++;     // 规划后立刻进入下一步
+                SendNext();
+                return;
+            }
+            bool allMatched = robots.Values.All(robot => robot.Src == robotPaths[robot.Id][pathIndex]);
+            if (!allMatched)
+            {
+                Debug.Log("Error: Some robots are not at the expected path index. Replanning...");
+                PathPlaning();  // 重新规划路径
+                pathIndex = 0;   // 归零 pathIndex
+                pathIndex++;     // 规划后立刻进入下一步
+                SendNext();
+                return;
+            }
+            else
+            {
+                pathIndex++;
+                SendNext();
+                return;               
+            }                     
+        }
+        private void SendNext()
+        {
+            Dictionary<int, int> nextPositions = new Dictionary<int, int>();
+            foreach (var kvp in robotPaths)
+            {
+                string pathStr = string.Join(", ", kvp.Value); // 将 List<int> 转换为字符串
+                Debug.Log($"Robot ID: {kvp.Key}, Path: [{pathStr}]");
+            }
+
+            foreach (var robot in robots.Values)
+            {
+                nextPositions[robot.Id] = robotPaths[robot.Id][pathIndex];
+            }
+            nats.SendNext(nextPositions);
+        }
+
+        private bool CheckNextExist()
+        {
+            foreach (var robot in robots.Values)
+            {
+                List<int> path = robotPaths[robot.Id];
+
+                if (pathIndex + 1 >= path.Count)  // 确保能访问 path[pathIndex + 1]
+                {
+                    Debug.Log($"Error: Path index {pathIndex} out of bounds for robot {robot.Id}. Replanning...");
+                    return false;
+                }
+            }
+            return true;
         }
 
         private void HandleDemand(Demand demand, string subject)
@@ -40,8 +123,7 @@ namespace Mission
 
             if (subject == "goal")
             {
-                HandleGoalRequest(demand);
-                nats.SendPath(robotPaths);
+                HandleGoalRequest(demand);                
             }
             else if (subject == "ret")
             {
@@ -60,7 +142,7 @@ namespace Mission
         private void HandleGoalRequest(Demand demand)
         {
             
-            Debug.Log($"[Arbitrator] Generating path for Goal Request: Id={demand.Id}");
+            //Debug.Log($"[Arbitrator] Generating path for Goal Request: Id={demand.Id}");
             RegisterRobot(demand.Id, demand.Src, demand.Dst, demand.Goal, demand.Re);
             PathPlaning();
         }
@@ -81,33 +163,37 @@ namespace Mission
             if (!mission.GetMap())
             {
                 Debug.LogError("Incorrect map! PathPlaning halted!");
+                return;
             }
             else
             {
                 //Debug.Log("Get map!");
                 if (!mission.GetConfig())
+                {
                     Debug.LogError("Incorrect configurations! Program halted!");
+                    return;
+                }
                 else
                 {
-                    Debug.Log("Get config!");
                     if (!mission.CreateLog())
-                        Debug.LogError("Log channel has not been created! Program halted!");
-                    else
                     {
-                        //Debug.Log("Start searching");
+                        Debug.LogError("Log channel has not been created! Program halted!");
+                        return;
                     }
-
                     mission.CreateAlgorithm();
                     int tasksCount = mission.getSingleExecution() ? 1 : mission.getTasksCount();
                     //Debug.Log("Start 2");
                     for (int i = 0; i < tasksCount; i++)
                     {
                         string agentsFile = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                        
-                                              
+
+
                         if (!mission.creatUnityTask(robots, priorityList))
+                        {
                             Debug.LogError("Agent set has not been created! Program halted!");
-                        else if (mission.checkAgentsCorrectness(agentsFile))
+                            return;
+                        }
+                       else if (mission.checkAgentsCorrectness(agentsFile))
                         {
                             //Debug.Log("Starting search for agents file " + agentsFile);
                             mission.startSearch(agentsFile);
@@ -117,6 +203,7 @@ namespace Mission
                     Debug.Log("[P&R] All searches are finished!");
                 }
             }
+            pathIndex = 0;
         }
 
         private void GetAllRobots()
@@ -133,9 +220,13 @@ namespace Mission
                 else
                 {
                     robots[pilot.id].UpdateInfo(pilot.src, pilot.dst, pilot.goal);
-                    UpdateRobotPriority(pilot.id);
+                    //UpdateRobotPriority(pilot.id);
                     //Debug.Log($"Robot {pilot.id} updated: new src={pilot.src}, new dst={pilot.dst}, new goal={pilot.goal}");
                 }
+            }
+            if (true)
+            {
+                // Remove the left robot here!
             }
         }
 
@@ -150,7 +241,7 @@ namespace Mission
             else
             {
                 robots[id].UpdateInfo(src, dst, goal);
-                if (re)
+                if (!re)
                 UpdateRobotPriority(id);
                 Debug.Log($"Robot {id} updated: new src={src}, new dst={dst}, new goal={goal}");
             }

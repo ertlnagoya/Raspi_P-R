@@ -15,15 +15,15 @@ namespace LineTrace.Handlers
         {
             if (mouse.lineSensor.Lightness(1) > 0.6f)
             {
-                mouse.Turn(1);
+                mouse.Turn(3);
             }
             else if (mouse.lineSensor.Lightness(2) > 0.6f)
             {
-                mouse.Turn(-1);
+                mouse.Turn(-3);
             }
             else
             {
-                mouse.Go(1);
+                mouse.Go(1.34f);
             }
         }
     }

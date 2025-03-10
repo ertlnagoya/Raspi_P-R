@@ -1,4 +1,7 @@
+using Mission;
+using NATS.Client;
 using RasPiMouse;
+using System.Security.Cryptography;
 using UnityEngine;
 
 namespace LineTrace.Handlers
@@ -35,7 +38,7 @@ namespace LineTrace.Handlers
         {
             var position = transform.position;
             var forward = transform.forward;
-
+            
             if (stage)
             {
                 var gap = center - position;
@@ -49,15 +52,15 @@ namespace LineTrace.Handlers
                     var sa = Rot(forward, gap);
                     if (sa > RadEps)
                     {
-                        mouse.Turn(-1);
+                        mouse.Turn(-3);
                     }
                     else if (sa < -RadEps)
                     {
-                        mouse.Turn(1);
+                        mouse.Turn(3);
                     }
                     else
                     {
-                        mouse.Go(1);
+                        mouse.Go(1.34f);
                     }
 
                     if (gap.magnitude < DistEps1)
@@ -72,15 +75,15 @@ namespace LineTrace.Handlers
                 var sa = Rot(forward, gap);
                 if (sa > RadEps)
                 {
-                    mouse.Turn(-1);
+                    mouse.Turn(-3);
                 }
                 else if (sa < -RadEps)
                 {
-                    mouse.Turn(1);
+                    mouse.Turn(3);
                 }
                 else
                 {
-                    mouse.Go(1);
+                    mouse.Go(1.34f);
                     if (gap.magnitude < DistEps2)
                     {
                         return true;

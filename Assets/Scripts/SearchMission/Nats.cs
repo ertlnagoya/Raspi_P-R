@@ -41,6 +41,17 @@ namespace Mission
 
             Debug.Log("[Arbitrator] NATS Listeners Started.");
         }
+        public void SubscribeSync()
+        {
+            // 监听 "goal" 主题
+            connection.SubscribeAsync(goalSubject, (sender, args) =>
+            {
+                ProcessIncomingMessage(args, goalSubject);
+            });
+
+            Debug.Log("[Arbitrator] NATS Listeners Started.");
+        }
+
         private void ProcessIncomingMessage(MsgHandlerEventArgs args, string subject)
         {
             string message = Encoding.UTF8.GetString(args.Message.Data);
@@ -62,6 +73,23 @@ namespace Mission
 
             // 将 Dictionary<int, int[]> 转换为 JSON
             string jsonData = JsonUtility.ToJson(new RobotPathsWrapper(path));
+
+            // 发送 JSON 数据到 "robot.paths" 频道
+            connection.Publish(responseSubject, Encoding.UTF8.GetBytes(jsonData));
+
+            Debug.Log($"Sent Robot Paths: {jsonData}");
+        }
+
+        public void SendNext(Dictionary<int, int> next)
+        {
+            if (next.Count == 0)
+            {
+                Debug.LogWarning("No robot paths to send.");
+                return;
+            }
+
+            // 将 Dictionary<int, int[]> 转换为 JSON
+            string jsonData = JsonUtility.ToJson(new AgentNextPositionWrapper(next));
 
             // 发送 JSON 数据到 "robot.paths" 频道
             connection.Publish(responseSubject, Encoding.UTF8.GetBytes(jsonData));
@@ -96,7 +124,32 @@ namespace Mission
             }
         }
 
- 
+        [Serializable]
+        private class AgentNextPositionWrapper
+        {
+            public List<AgentNextPosition> agents = new List<AgentNextPosition>();
+
+            public AgentNextPositionWrapper(Dictionary<int, int> agentPositions)
+            {
+                foreach (var kvp in agentPositions)
+                {
+                    agents.Add(new AgentNextPosition(kvp.Key, kvp.Value));
+                }
+            }
+        }
+
+        [Serializable]
+        private class AgentNextPosition
+        {
+            public int id;
+            public int nextPosition;
+
+            public AgentNextPosition(int id, int nextPosition)
+            {
+                this.id = id;
+                this.nextPosition = nextPosition;
+            }
+        }
 
     }
 }

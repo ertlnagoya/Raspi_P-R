@@ -32,17 +32,7 @@ namespace LineTrace
 
         private void Start()
         {
-            CapsuleCollider capsule = GetComponent<CapsuleCollider>();
-            if (capsule != null)
-            {
-                capsuleRadius = 0.02f;
-                capsule.radius = capsuleRadius;
-                capsule.height = 2;              
-            }
-            else
-            {
-                Debug.LogError("该游戏对象没有 CapsuleCollider 组件！");
-            }
+
         }
 
         void OnDrawGizmos()

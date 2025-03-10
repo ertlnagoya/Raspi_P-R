@@ -38,7 +38,7 @@ namespace LineTrace.Handlers
                 }
             }
 
-            mouse.Turn(1);
+            mouse.Turn(3);
 
             return false;
         }

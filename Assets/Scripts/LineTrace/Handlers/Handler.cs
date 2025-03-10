@@ -36,18 +36,19 @@ namespace LineTrace.Handlers
             backHandler = new BackHandler(mouse1);
             crossHandler = new CrossHandler(mouse1);
 
-            maxT = Random.Range(2, 3.5f);
+            maxT = 8f;
 
             RMColor = color;
         }
 
-        public void Handle()
+        public bool Handle()
         {
+            //Debug.Log($"in back {action}");
             if (action == CarAction.Back)
             {
                 if (backHandler.Update()) action = CarAction.Go;
             } 
-            else if (Mathf.Min(mouse.distSensor.Distance(0), mouse.distSensor.Distance(3)) < 0.15f)  //detect collider or? 
+            else if (Mathf.Min(mouse.distSensor.Distance(0), mouse.distSensor.Distance(3)) < 0.03f)  //detect collider or? 
             {
                 t += Time.deltaTime;
                 if (t > maxT)
@@ -58,6 +59,7 @@ namespace LineTrace.Handlers
                     if(!isCollision){
                         Debug.Log( "[Collision]" + " RM: " + RMColor + " time[s]: " +Time.time);
                         isCollision = true;
+                        return true;
                     }
                 }
 
@@ -74,6 +76,7 @@ namespace LineTrace.Handlers
                 goHandler.Update();
                 isCollision = false;
             }
+            return false;
         }
 
         public void SetCross(Vector3 center, Vector3 dest)

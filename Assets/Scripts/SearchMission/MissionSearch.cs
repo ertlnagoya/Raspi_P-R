@@ -121,7 +121,7 @@ namespace Mission
                 if (!map.CellOnGrid(start.i, start.j) || !map.CellOnGrid(goal.i, goal.j) ||
                     map.CellIsObstacle(start.i, start.j) || map.CellIsObstacle(goal.i, goal.j))
                 {
-                    UnityEngine.Debug.Log($"Warning: start or goal position of agent {agent.getId()} in {agentsFile} agents file is incorrect. This file will be ignored");
+                    UnityEngine.Debug.Log($"Warning: start or goal position of agent {agent.getId()}: ({start.i},{start.j}) in {agentsFile} agents file is incorrect. This file will be ignored");
                     return false;
                 }
             }
@@ -137,13 +137,25 @@ namespace Mission
                     }
                     else if (agentSet.getAgent(i).getGoalPosition().Equals(agentSet.getAgent(j).getGoalPosition()))
                     {
-                        UnityEngine.Debug.Log($"Warning: goal positions of agents {i} and {j} in {agentsFile} are in the same cell. This file will be ignored");
-                        Node conflicPosition = agentSet.getAgent(j).getGoalPosition();
-                        agentSet.getAgent(j).setGoalPosition(map.RandomConnectingCell(conflicPosition));
+                        UnityEngine.Debug.Log($"Warning: goal positions of agents {i} and {j} in {agentsFile} are in the same cell.");
                        // return true;
                     }
                 }
             }
+
+            HashSet<Node> goalList = new HashSet<Node>();
+            HashSet<Node> startList = new HashSet<Node>();
+            for (int i = 0; i < agentSet.getAgentCount(); ++i)
+            {
+                while (goalList.Contains(agentSet.getAgent(i).getGoalPosition()))
+                {
+                    Node conflicPosition = agentSet.getAgent(i).getGoalPosition();
+                    agentSet.getAgent(i).setGoalPosition(map.RandomConnectingCell(conflicPosition));
+                    UnityEngine.Debug.Log($"Warning: goal positions of agents {i} adjusted from ({conflicPosition.i * map.getMapHeight() + conflicPosition.j} to {agentSet.getAgent(i).getGoalPosition().i * map.getMapHeight() + agentSet.getAgent(i).getGoalPosition().j}!");
+                }
+                goalList.Add(agentSet.getAgent(i).getGoalPosition());
+            }
+            
 
             return true;
         }
@@ -292,7 +304,7 @@ namespace Mission
 
                 if (!agentsPaths[j][agentsPaths[j].Count - 1].Equals(agentSet.getAgent(j).getGoalPosition()))
                 {
-                    UnityEngine.Debug.LogError("[P&R] Incorrect result: agent path ends in wrong position!");
+                    UnityEngine.Debug.Log($"[P&R] Incorrect result: agent path ends in wrong position! {agentsPaths[j][agentsPaths[j].Count - 1]} != {agentSet.getAgent(j).getGoalPosition()}");
                     return false;
                 }
 
@@ -311,7 +323,7 @@ namespace Mission
 
                     if (map.CellIsObstacle(agentsPaths[j][i].i, agentsPaths[j][i].j))
                     {
-                        UnityEngine.Debug.LogError("[P&R] Incorrect result: agent path goes through obstacle!");
+                        UnityEngine.Debug.Log("[P&R] Incorrect result: agent path goes through obstacle!");
                         return false;
                     }
 
@@ -393,7 +405,8 @@ namespace Mission
                     ParsePosition(robot.Goal, out goal_i, out goal_j);
                     agentSet.addAgent(start_i, start_j, goal_i, goal_j);
                 }
-            }                    
+            }
+            Console.WriteLine("Priority List: " + string.Join(", ", priorityList));
             return true;
 
         }
@@ -427,13 +440,13 @@ namespace Mission
 
         private void ParsePosition(int position, out int i, out int j)
         {
-            j = position % 17;  // 计算 b
-            i = position / 17;  // 计算 a
+            j = position % map.getMapHeight();  // 计算 b
+            i = position / map.getMapHeight();  // 计算 a
         }
 
         private void ParseNode(int i, int j, out int position)
         {
-            position = i * 17 + j; // Caution! different with ParsePosition
+            position = i * map.getMapHeight() + j; // Caution! different with ParsePosition
         }
 
         private void AddPositionToPath(int robotID, int position, Dictionary<int, List<int>> paths)

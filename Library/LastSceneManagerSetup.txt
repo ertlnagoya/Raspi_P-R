@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/D-SoS_scyn.unity
+- path: Assets/Scenes/D-SoS_scyn_Cut.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0

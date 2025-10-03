@@ -25,4 +25,4 @@ running nats-server
 
 Unity:
 
-Please open the senen "D-SoS_scny_Cut"
+Please open the scenen "D-SoS_scny_Cut"

@@ -397,3 +397,28 @@ sysinfo.txt
 
 # Unity cache
 *.unitypackage
+
+# Unity generated folders
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+
+# Crash reports
+sysinfo.txt
+
+# Ignore Unity auto-generated .csproj and solution files
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd

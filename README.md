@@ -14,7 +14,7 @@ Main code of the P&R is under Assets\Script\SearchMissiom.
 
 
 Running:
-git clone https://github.com/ertlnagoya/Raspi_P-R.git
+git clone https://github.com/ertlnagoya/Raspi_P-R.git /n
 cd Raspi_P-R
 git checkout -b scny_Setnext origin/scny_Setnext
 

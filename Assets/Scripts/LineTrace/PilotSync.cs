@@ -1,4 +1,6 @@
-﻿using LineTrace.Handlers;
+﻿#define SelectGoal 
+
+using LineTrace.Handlers;
 using RasPiMouse;
 using System;
 using System.Collections.Generic;
@@ -42,12 +44,16 @@ namespace LineTrace
             handler = new Handler(mouse, RMColor[id]);
             nats = new Nats();
             nats.SubscribeSync(ChangeNext, id);
+#if SelectGoal
+            goal = SelectGoal(); 
+#else
             goal = RandomGoal(-1);
+#endif
         }
         private void Start()
         {
 
-            Debug.Log($"[start] robot {id} start from {src} to {dst}");
+            //Debug.Log($"[start] robot {id} start from {src} to {dst}");
 
             nats.Send("goal", new Demand { Id = id, Src = src, Dst = dst, Goal = goal, Re = false });
 
@@ -55,7 +61,7 @@ namespace LineTrace
 
         private void ChangeNext(int newNext)
         {
-            Debug.Log($"robot {id} Reseived Next:{newNext}.");            
+            //Debug.Log($"robot {id} Reseived Next:{newNext}.");            
             SetNext(newNext);
         }
         private void Update()
@@ -129,7 +135,11 @@ namespace LineTrace
             if (cross.number == goal)
             {
                 level++;
-                goal = RandomGoal(goal);
+#if SelectGoal
+                goal = SelectGoal();
+#else
+                goal = RandomGoal(-1);
+#endif
                 nats.Send("goal", new Demand { Id = id, Src = src, Dst = dst, Goal = goal, Re = false });
                 print("[Goal]" + " RM: " + RMColor[id] + " Goal count: " + level + " time[s]: " + Time.time);
             }   
@@ -149,12 +159,12 @@ namespace LineTrace
                 isSetCross = false;
             }
 
-            Debug.Log($"[setNext] robot {id} start from {src} to {dst}");
+            //Debug.Log($"[setNext] robot {id} start from {src} to {dst}");
         }
 
-        int RandomGoal(int preGoal)
+        private int RandomGoal(int preGoal)
         {            
-            int[] points = {119, 149, 140, 77, 10, 5, 40, 79, 96, 44, 74};
+            int[] points = {119, 149, 140, 64, 10, 5, 40, 79, 96, 44, 61};
             int newPoint;
 
             do
@@ -163,6 +173,13 @@ namespace LineTrace
             }
             while (newPoint == preGoal);  // 确保新点不同于上次的点           
             return newPoint;
+        }
+
+        private int[] goalList = { 44, 96, 64, 140, 5, 61, 79, 96, 119, 10, 40, 149};
+        private int SelectGoal()
+        {
+            int goal = goalList[(level + id) % goalList.Length];
+            return goal;
         }
     }
 }

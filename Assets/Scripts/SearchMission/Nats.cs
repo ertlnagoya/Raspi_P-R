@@ -27,7 +27,7 @@ namespace Mission
             var opts = ConnectionFactory.GetDefaultOptions();
             opts.Url = "nats://localhost:4222";
             connection = new ConnectionFactory().CreateConnection(opts);
-            Debug.Log($"Arbitrator connection building:");
+            //Debug.Log($"Arbitrator connection building:");
         }
 
 
@@ -39,7 +39,7 @@ namespace Mission
                 ProcessIncomingMessage(args, goalSubject);
             });
 
-            Debug.Log("[Arbitrator] NATS Listeners Started.");
+           // Debug.Log("[Arbitrator] NATS Listeners Started.");
         }
         public void SubscribeSync()
         {
@@ -49,13 +49,13 @@ namespace Mission
                 ProcessIncomingMessage(args, goalSubject);
             });
 
-            Debug.Log("[Arbitrator] NATS Listeners Started.");
+            //Debug.Log("[Arbitrator] NATS Listeners Started.");
         }
 
         private void ProcessIncomingMessage(MsgHandlerEventArgs args, string subject)
         {
             string message = Encoding.UTF8.GetString(args.Message.Data);
-            Debug.Log($"[Arb] Received {subject} Request: {message}");
+            //Debug.Log($"[Arb] Received {subject} Request: {message}");
 
             Demand demand = JsonUtility.FromJson<Demand>(message);
 
@@ -77,7 +77,7 @@ namespace Mission
             // 发送 JSON 数据到 "robot.paths" 频道
             connection.Publish(responseSubject, Encoding.UTF8.GetBytes(jsonData));
 
-            Debug.Log($"Sent Robot Paths: {jsonData}");
+            //Debug.Log($"Sent Robot Paths: {jsonData}");
         }
 
         public void SendNext(Dictionary<int, int> next)
@@ -94,7 +94,7 @@ namespace Mission
             // 发送 JSON 数据到 "robot.paths" 频道
             connection.Publish(responseSubject, Encoding.UTF8.GetBytes(jsonData));
 
-            Debug.Log($"Sent Robot Paths: {jsonData}");
+            //Debug.Log($"Sent Robot Paths: {jsonData}");
         }
 
         [Serializable]

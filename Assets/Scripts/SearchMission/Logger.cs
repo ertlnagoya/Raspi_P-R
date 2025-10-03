@@ -99,7 +99,7 @@ namespace Mission
                 XmlElement lowLevelElement = doc.CreateElement("LowLevel");
                 logElement.AppendChild(lowLevelElement);
             }
-            Console.WriteLine($"Log file will be saved at: {logFileName}");
+            //Console.WriteLine($"Log file will be saved at: {logFileName}");
             return true;
         }
 

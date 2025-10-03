@@ -1374,7 +1374,7 @@ namespace Mission
             DateTime begin = DateTime.Now;
             getSubgraphs(map, agentSet);
 
-            AgentSet goalAgentSet = agentSet.Clone(); // 假设 AgentSet 实现了 Clone 方法
+            AgentSet goalAgentSet = agentSet.Clone(); 
             for (int i = 0; i < agentSet.getAgentCount(); ++i)
             {
                 Node goal = agentSet.getAgent(i).getGoalPosition();

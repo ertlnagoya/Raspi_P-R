@@ -137,7 +137,7 @@ namespace Mission
                     }
                     else if (agentSet.getAgent(i).getGoalPosition().Equals(agentSet.getAgent(j).getGoalPosition()))
                     {
-                        UnityEngine.Debug.Log($"Warning: goal positions of agents {i} and {j} in {agentsFile} are in the same cell.");
+                        //UnityEngine.Debug.Log($"Warning: goal positions of agents {i} and {j} in {agentsFile} are in the same cell.");
                        // return true;
                     }
                 }
@@ -150,7 +150,7 @@ namespace Mission
                 while (goalList.Contains(agentSet.getAgent(i).getGoalPosition()))
                 {
                     Node conflicPosition = agentSet.getAgent(i).getGoalPosition();
-                    agentSet.getAgent(i).setGoalPosition(map.RandomConnectingCell(conflicPosition));
+                    agentSet.getAgent(i).setGoalPosition(map.RandomConnectingCell(conflicPosition, goalList));
                     UnityEngine.Debug.Log($"Warning: goal positions of agents {i} adjusted from ({conflicPosition.i * map.getMapHeight() + conflicPosition.j} to {agentSet.getAgent(i).getGoalPosition().i * map.getMapHeight() + agentSet.getAgent(i).getGoalPosition().j}!");
                 }
                 goalList.Add(agentSet.getAgent(i).getGoalPosition());
@@ -178,20 +178,22 @@ namespace Mission
                 {
                     Agent agent = agentSet.getAgent(j);
                     curAgentSet.addAgent(agent.getCur_i(), agent.getCur_j(), agent.getGoal_i(), agent.getGoal_j());
+                    //UnityEngine.Debug.Log($"search for agent {agent.getId()} from {agent.getStart_i() * map.getMapHeight() + agent.getStart_j()} to {agent.getGoal_i() * map.getMapHeight() + agent.getGoal_j()}");
                 }
 
                 multiagentSearch.clear();
 
                 Stopwatch chronoTimer = Stopwatch.StartNew();
                 var clockStart = DateTime.Now;
-
+                
+                
                 sr = multiagentSearch.startSearch(map, config, curAgentSet);
                 //UnityEngine.Debug.Log($"search result is {sr.pathfound}");
                 chronoTimer.Stop();
-                UnityEngine.Debug.Log($"[P&R] Chrono time: {chronoTimer.ElapsedMilliseconds} ms");
+                //UnityEngine.Debug.Log($"[P&R] Chrono time: {chronoTimer.ElapsedMilliseconds} ms");
 
                 var clockEnd = DateTime.Now;
-                UnityEngine.Debug.Log($"[P&R] Clock time: {(clockEnd - clockStart).TotalMilliseconds} ms");
+                //UnityEngine.Debug.Log($"[P&R] Clock time: {(clockEnd - clockStart).TotalMilliseconds} ms");
 
                 if (!sr.pathfound)
                 {
@@ -204,7 +206,7 @@ namespace Mission
                 }
 
                 agentsPaths = sr.agentsPaths;
-
+                /*
                 res.data[Constants.CNS_TAG_ATTR_MAKESPAN][i] = sr.makespan;
                 res.data[Constants.CNS_TAG_ATTR_FLOWTIME][i] = sr.flowtime;
                 res.data[Constants.CNS_TAG_ATTR_TIME][i] = sr.time;
@@ -219,6 +221,7 @@ namespace Mission
                 res.finalHLExpansions[i] = (int)sr.finalHLExpansions;
                 res.finalHLExpansionsStart[i] = (int)sr.finalHLExpansionsStart;
                 //UnityEngine.Debug.Log($"search result is {agentsFile}");
+                /*
                 if (config.singleExecution)
                 {
 
@@ -232,21 +235,21 @@ namespace Mission
                     catch (Exception ex)
                     {
                         // 捕获异常后可以在这里处理，比如记录日志或输出错误信息
-                        UnityEngine.Debug.Log("调用 saveAgentsPathsToLog 时发生异常: " + ex.Message);
+                        //UnityEngine.Debug.Log("调用 saveAgentsPathsToLog 时发生异常: " + ex.Message);
                         // 如果需要，还可以将异常写入日志文件或执行其他恢复操作
                     }
                 }
-
+                */
                 if (!checkCorrectness())
                 {
                     UnityEngine.Debug.LogError("Search returned incorrect results!");
                     break;
                 }
 
-                UnityEngine.Debug.Log($"[P&R] Found solution for {i} agents. Time: {sr.time[^1]}, flowtime: {sr.flowtime[^1]}, makespan: {sr.makespan[^1]}");
+               // UnityEngine.Debug.Log($"[P&R] Found solution for {i} agents. Time: {sr.time[^1]}, flowtime: {sr.flowtime[^1]}, makespan: {sr.makespan[^1]}");
             }
 
-            testingResults.Add(res);
+            //testingResults.Add(res);
         }
 
         public void saveAgentsPathsToLog(
@@ -406,7 +409,7 @@ namespace Mission
                     agentSet.addAgent(start_i, start_j, goal_i, goal_j);
                 }
             }
-            Console.WriteLine("Priority List: " + string.Join(", ", priorityList));
+            //Console.WriteLine("Priority List: " + string.Join(", ", priorityList));
             return true;
 
         }

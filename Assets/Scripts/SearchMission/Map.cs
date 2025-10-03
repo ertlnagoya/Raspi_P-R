@@ -219,7 +219,8 @@ namespace Mission
         {
             return (i < height && i >= 0 && j < width && j >= 0);
         }
-        public Node RandomConnectingCell(Node conflicPosition)
+        /*
+        public Node RandomConnectingCell(Node conflicPosition, HashSet<Node> goalList)
         {
             int i = conflicPosition.i;
             int j = conflicPosition.j;
@@ -240,6 +241,48 @@ namespace Mission
             if (j + 1 < width && grid[i][ j + 1] == 0)
                 return new Node(i, j + 1);
             return null;
+        }
+        */
+
+        public Node RandomConnectingCell(Node conflicPosition, HashSet<Node> goalList)
+        {
+            List<Node> candidates = new List<Node>();
+            HashSet<(int, int)> visited = new HashSet<(int, int)>();
+
+            FindCandidates(conflicPosition.i, conflicPosition.j, goalList, candidates, visited);
+
+            if (candidates.Count > 0)
+            {
+                System.Random rand = new System.Random();
+                return candidates[rand.Next(candidates.Count)];
+            }
+
+            return null; // 理论上不会执行到这里
+        }
+
+        private void FindCandidates(int i, int j, HashSet<Node> goalList, List<Node> candidates, HashSet<(int, int)> visited)
+        {
+            if (visited.Contains((i, j))) return;
+            visited.Add((i, j));
+
+            // 依次检查四个方向
+            if (i - 1 >= 0 && grid[i - 1][j] == 0 && !goalList.Any(goal => goal.i == i - 1 && goal.j == j))
+                candidates.Add(new Node(i - 1, j));
+            if (i + 1 < height && grid[i + 1][j] == 0 && !goalList.Any(goal => goal.i == i + 1 && goal.j == j))
+                candidates.Add(new Node(i + 1, j));
+            if (j - 1 >= 0 && grid[i][j - 1] == 0 && !goalList.Any(goal => goal.i == i && goal.j == j - 1))
+                candidates.Add(new Node(i, j - 1));
+            if (j + 1 < width && grid[i][j + 1] == 0 && !goalList.Any(goal => goal.i == i && goal.j == j + 1))
+                candidates.Add(new Node(i, j + 1));
+
+            // 如果找到了至少一个候选点，则停止
+            if (candidates.Count > 0) return;
+
+            // 否则，递归查找四个方向的相邻点
+            if (i - 1 >= 0 && grid[i - 1][j] == 0) FindCandidates(i - 1, j, goalList, candidates, visited);
+            if (i + 1 < height && grid[i + 1][j] == 0) FindCandidates(i + 1, j, goalList, candidates, visited);
+            if (j - 1 >= 0 && grid[i][j - 1] == 0) FindCandidates(i, j - 1, goalList, candidates, visited);
+            if (j + 1 < width && grid[i][j + 1] == 0) FindCandidates(i, j + 1, goalList, candidates, visited);
         }
 
         public int getValue(int i, int j)
@@ -328,14 +371,14 @@ namespace Mission
                 }
                 else
                 {
-                    Debug.Log($"Cross ID {randomCross} invalid.");
+                    //Debug.Log($"Cross ID {randomCross} invalid.");
                     return (0, 0);
                 }
 
             }
             else
             {
-                Debug.Log($"Cross ID {randomCross} not found.");
+               // Debug.Log($"Cross ID {randomCross} not found.");
                 return (0, 0);
             }
         }

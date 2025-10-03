@@ -24,7 +24,7 @@ namespace Mission
             nats = new Nats();
             nats.SubscribeSync();
             nats.OnDemandReceived += HandleDemand;  // 监听 Nats 传递的请求
-            Debug.Log("[Arbitrator] start.");
+            //Debug.Log("[Arbitrator] start.");
         }
 
         void Start()
@@ -69,10 +69,17 @@ namespace Mission
                 SendNext();
                 return;
             }
-            bool allMatched = robots.Values.All(robot => robot.Src == robotPaths[robot.Id][pathIndex]);
-            if (!allMatched)
+            var unmatchedRobots = robots.Values
+                .Where(robot => robot.Src != robotPaths[robot.Id][pathIndex])
+                .ToList();
+
+            if (unmatchedRobots.Any())
             {
-                Debug.Log("Error: Some robots are not at the expected path index. Replanning...");
+                Console.WriteLine("Unmatched robots:");
+                foreach (var robot in unmatchedRobots)
+                {
+                    Console.WriteLine($"Robot ID: {robot.Id}, Src: {robot.Src}, Expected: {robotPaths[robot.Id][pathIndex]}");
+                }                
                 PathPlaning();  // 重新规划路径
                 pathIndex = 0;   // 归零 pathIndex
                 pathIndex++;     // 规划后立刻进入下一步
@@ -92,7 +99,7 @@ namespace Mission
             foreach (var kvp in robotPaths)
             {
                 string pathStr = string.Join(", ", kvp.Value); // 将 List<int> 转换为字符串
-                Debug.Log($"Robot ID: {kvp.Key}, Path: [{pathStr}]");
+                //Debug.Log($"Robot ID: {kvp.Key}, Path: [{pathStr}]");
             }
 
             foreach (var robot in robots.Values)
@@ -110,7 +117,7 @@ namespace Mission
 
                 if (pathIndex + 1 >= path.Count)  // 确保能访问 path[pathIndex + 1]
                 {
-                    Debug.Log($"Error: Path index {pathIndex} out of bounds for robot {robot.Id}. Replanning...");
+                    //Debug.Log($"Error: Path index {pathIndex} out of bounds for robot {robot.Id}. Replanning...");
                     return false;
                 }
             }
@@ -119,7 +126,7 @@ namespace Mission
 
         private void HandleDemand(Demand demand, string subject)
         {
-            Debug.Log($"[Arbitrator] Processing {subject.ToUpper()} Request: Id={demand.Id}, Src={demand.Src}, Dst={demand.Dst}, Goal={demand.Goal}, Re={demand.Re}");           
+            //Debug.Log($"[Arbitrator] Processing {subject.ToUpper()} Request: Id={demand.Id}, Src={demand.Src}, Dst={demand.Dst}, Goal={demand.Goal}, Re={demand.Re}");           
 
             if (subject == "goal")
             {
@@ -149,13 +156,13 @@ namespace Mission
 
         private void HandleRetRequest(Demand demand)
         {
-            Debug.Log($"[Arbitrator] Generating path for Ret Request: Id={demand.Id}");
+            //Debug.Log($"[Arbitrator] Generating path for Ret Request: Id={demand.Id}");
             UpdateRobot(demand.Id, demand.Src, demand.Dst);            
         }
 
         private void PathPlaning()
         {
-            Debug.Log("[P&R] Start planning");
+            //Debug.Log("[P&R] Start planning");
             
             string fileName = Path.Combine(Application.dataPath, "Scripts", "SearchMission", "Examples", Configuration);
             MissionSearch mission = new MissionSearch(fileName);
@@ -200,7 +207,7 @@ namespace Mission
                             robotPaths = mission.getResults(priorityList);
                         }
                     }
-                    Debug.Log("[P&R] All searches are finished!");
+                    //Debug.Log("[P&R] All searches are finished!");
                 }
             }
             pathIndex = 0;
@@ -236,14 +243,14 @@ namespace Mission
             {
                 robots[id] = new Robot(id, src, dst, goal);
                 priorityList.Add(id);  // 将机器人ID加入优先级列表
-                Debug.Log($"Robot {id} registered at point {src} to {dst}");
+                //Debug.Log($"Robot {id} registered at point {src} to {dst}");
             }
             else
             {
                 robots[id].UpdateInfo(src, dst, goal);
                 if (!re)
                 UpdateRobotPriority(id);
-                Debug.Log($"Robot {id} updated: new src={src}, new dst={dst}, new goal={goal}");
+                //Debug.Log($"Robot {id} updated: new src={src}, new dst={dst}, new goal={goal}");
             }
         }
 
@@ -260,12 +267,12 @@ namespace Mission
         {
             if (!robots.ContainsKey(id))
             {
-                Debug.Log($"Robot {id} not registered for update");
+                //Debug.Log($"Robot {id} not registered for update");
             }
             else
             {
                 robots[id].UpdateInfo(src, dst);
-                Debug.Log($"Robot {id} updated: new src={src}, new dst={dst}");
+                //Debug.Log($"Robot {id} updated: new src={src}, new dst={dst}");
             }
         }
 

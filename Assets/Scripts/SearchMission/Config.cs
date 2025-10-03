@@ -110,7 +110,7 @@ namespace Mission
 
             foreach (XmlNode child in options.ChildNodes)
             {
-                Console.WriteLine(child.Name);
+                //Console.WriteLine(child.Name);
             }
 
             LogParams = new string[3];
@@ -121,7 +121,7 @@ namespace Mission
             XmlNode? element = options.SelectSingleNode(Constants.CNS_TAG_LOGPATH);
             if (element == null || element.InnerText == "")
             {
-                Console.WriteLine("Warning! Value of " + Constants.CNS_TAG_LOGPATH + "tag was defined to 'current directory'.");
+                //Console.WriteLine("Warning! Value of " + Constants.CNS_TAG_LOGPATH + "tag was defined to 'current directory'.");
             }
             else
             {
@@ -131,7 +131,7 @@ namespace Mission
             element = options.SelectSingleNode(Constants.CNS_TAG_LOGFN);
             if (element == null || element.InnerText == "")
             {
-                Console.WriteLine("Warning! Value of " + Constants.CNS_TAG_LOGFN + " tag was defined to default.");
+                //Console.WriteLine("Warning! Value of " + Constants.CNS_TAG_LOGFN + " tag was defined to default.");
             }
             else
             {

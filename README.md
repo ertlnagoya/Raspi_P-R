@@ -14,11 +14,15 @@ Main code of the P&R is under Assets\Script\SearchMissiom.
 
 
 Running:
-git clone https://github.com/ertlnagoya/Raspi_P-R.git /n
+
+git clone https://github.com/ertlnagoya/Raspi_P-R.git 
+
 cd Raspi_P-R
+
 git checkout -b scny_Setnext origin/scny_Setnext
 
-nats-server
+running nats-server
 
 Unity:
+
 Please open the senen "D-SoS_scny_Cut"
